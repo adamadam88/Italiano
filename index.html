@@ -501,6 +501,48 @@ th{font-size:.82rem;color:var(--ink-2);font-weight:600}
 .pend{display:grid;justify-items:center;gap:6px;padding:10px 0 20px;font-family:var(--round);font-size:1.1rem}
 @media (max-width:420px){.prow{transform:translateX(calc(var(--off) * 34px))}.pmk{transform:translate(calc(-50% + var(--side) * 92px),-58%)}}
 
+/* ---- diàlegs ---- */
+.dlines{display:grid;gap:10px}
+.dl{display:grid;gap:3px;text-align:left;padding:12px 14px;border-radius:16px;max-width:88%;background:var(--surface-2);transition:box-shadow .15s,transform .15s}
+.dl.s1{justify-self:end;background:var(--brand-soft)}
+.dl .who{font-family:var(--round);font-weight:800;font-size:.78rem;color:var(--ink-2);text-transform:uppercase;letter-spacing:.04em}
+.dl .it{font-size:1.08rem;font-weight:600;line-height:1.4}
+.dl .it.blur{filter:blur(6px);user-select:none}
+.dl .ca{font-size:.9rem;color:var(--ink-2)}
+.dl.on{box-shadow:0 0 0 2.5px var(--sun);transform:scale(1.02)}
+.dl.on .it.blur{filter:blur(3px)}
+.btn svg.fill{width:18px;height:18px}
+.page > h2{margin-top:6px}
+/* ---- parla ---- */
+.shtxt{font-family:var(--round);font-weight:800;font-size:clamp(1.5rem,5.5vw,2.1rem);line-height:1.25}
+.shtxt .hit{color:var(--ok)}.shtxt .miss{color:var(--bad);text-decoration:underline wavy;text-underline-offset:5px}
+.recrow{display:flex;align-items:center;gap:14px;padding:6px 0}
+.recbtn{width:76px;height:76px;border-radius:50%;background:var(--bad);color:#fff;display:grid;place-items:center;box-shadow:0 5px 0 color-mix(in srgb,var(--bad) 65%,#000);flex:none}
+.recbtn svg{width:34px;height:34px}
+.recbtn:active{transform:translateY(3px);box-shadow:0 2px 0 color-mix(in srgb,var(--bad) 65%,#000)}
+.recbtn.on{animation:recp 1.2s ease-in-out infinite}
+@keyframes recp{0%,100%{box-shadow:0 5px 0 color-mix(in srgb,var(--bad) 65%,#000),0 0 0 0 color-mix(in srgb,var(--bad) 45%,transparent)}50%{box-shadow:0 5px 0 color-mix(in srgb,var(--bad) 65%,#000),0 0 0 14px transparent}}
+/* ---- slang ---- */
+.slist{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px}
+.sl{background:var(--surface);border-radius:var(--r-md);box-shadow:0 0 0 1px var(--line);padding:14px 16px;display:grid;gap:6px;align-content:start}
+.sl b{font-family:var(--round);font-weight:800;font-size:1.15rem}
+.sl .m{font-weight:600}
+.sl .ex{display:grid;gap:2px;text-align:left;padding:8px 10px;border-radius:10px;background:var(--surface-2);font-size:.92rem}
+.sl .ex .muted{font-size:.85rem}
+.badge.bad{background:var(--bad-soft);color:var(--bad)}
+/* ---- nivell A2 i examen ---- */
+.cando{display:flex;gap:12px;align-items:flex-start;padding:14px 16px;border-top:1px solid var(--line);cursor:pointer}
+.cando:first-child{border-top:0}
+.cando input{width:22px;height:22px;accent-color:var(--brand);flex:none;margin-top:2px}
+.cando input:checked + span{font-weight:600}
+.exsteps{display:flex;gap:6px;flex-wrap:wrap}
+.exsteps span{padding:6px 12px;border-radius:99px;font-family:var(--round);font-weight:700;font-size:.85rem;background:var(--surface-2);color:var(--ink-3)}
+.exsteps span.on{background:var(--brand);color:var(--on-brand)}
+.exsteps span.done{background:var(--brand-soft);color:var(--brand)}
+.opt.sel{background:var(--brand-soft);box-shadow:inset 0 0 0 2px var(--brand),0 3px 0 var(--brand)}
+.center-card{justify-items:center;text-align:center}
+.a2link .glyph{width:40px;height:40px;border-radius:12px;background:var(--brand-soft);color:var(--brand);display:grid;place-items:center;flex:none}
+
 </style>
 </head>
 <body>
@@ -1746,6 +1788,354 @@ function moka(state, size, extra){
     '</g></svg>';
 }
 
+/* Diàlegs per escoltar. w: setmana recomanada. p: noms dels dos personatges (0 i 1). l: [qui, italià, català].
+   q: [pregunta, [opcions], índex correcta]. inf: diàleg informal (amb slang). */
+const DIALOGS = [
+{id:"bar", w:1, t:"Al bar", s:"Demanes un cafè i un croissant", p:["Barista","Cliente"], l:[
+ [0,"Buongiorno! Cosa prende?","Bon dia! Què pren?"],
+ [1,"Buongiorno. Un cappuccino e un cornetto, per favore.","Bon dia. Un caputxino i un croissant, si us plau."],
+ [0,"Il cornetto vuoto o alla crema?","El croissant sol o de crema?"],
+ [1,"Alla crema, grazie. Quant'è?","De crema, gràcies. Quant és?"],
+ [0,"Sono tre euro e venti.","Són tres euros vint."],
+ [1,"Ecco a lei. Buona giornata!","Aquí té. Bon dia!"],
+ [0,"Grazie, altrettanto!","Gràcies, igualment!"]],
+ q:[["Què demana el client?",["Un caputxino i un croissant","Un cafè i un entrepà","Un suc i un croissant"],0],["Com vol el croissant?",["De crema","Sol","De xocolata"],0],["Quant paga?",["3,20 €","2,30 €","3,50 €"],0]]},
+{id:"presentarsi", w:1, t:"Piacere!", s:"Coneixes algú en una festa", p:["Giulia","Adam"], l:[
+ [0,"Ciao! Io sono Giulia. Tu come ti chiami?","Hola! Jo soc la Giulia. Tu com et dius?"],
+ [1,"Ciao, piacere! Mi chiamo Adam.","Hola, encantat! Em dic Adam."],
+ [0,"Piacere mio! Di dove sei?","El gust és meu! D'on ets?"],
+ [1,"Sono spagnolo, di Barcellona. Parlo catalano e spagnolo.","Soc espanyol, de Barcelona. Parlo català i castellà."],
+ [0,"Che bello! E cosa fai qui a Milano?","Que bé! I què fas aquí a Milà?"],
+ [1,"Studio italiano e lavoro un po'. E tu?","Estudio italià i treballo una mica. I tu?"],
+ [0,"Io sono di qui. Faccio la grafica.","Jo soc d'aquí. Soc dissenyadora gràfica."]],
+ q:[["D'on és l'Adam?",["De Barcelona","De Milà","De Madrid"],0],["Què fa l'Adam a Milà?",["Estudia italià i treballa una mica","Fa vacances","Visita la família"],0],["Quina feina fa la Giulia?",["Dissenyadora gràfica","Professora","Cambrera"],0]]},
+{id:"albergo", w:2, t:"In albergo", s:"Arribes a l'hotel", p:["Receptionist","Cliente"], l:[
+ [0,"Buonasera, benvenuto. Ha una prenotazione?","Bona nit, benvingut. Té una reserva?"],
+ [1,"Sì, a nome González. Una camera singola per tre notti.","Sí, a nom de González. Una habitació individual per a tres nits."],
+ [0,"Perfetto. Mi può dare un documento, per favore?","Perfecte. Em pot donar un document, si us plau?"],
+ [1,"Certo, ecco il passaporto. A che ora è la colazione?","És clar, aquí té el passaport. A quina hora és l'esmorzar?"],
+ [0,"Dalle sette alle dieci, al primo piano. La sua camera è la 214.","De les set a les deu, al primer pis. La seva habitació és la 214."],
+ [1,"C'è il wifi in camera?","Hi ha wifi a l'habitació?"],
+ [0,"Sì, la password è sul biglietto con la chiave. Buona permanenza!","Sí, la contrasenya és a la targeta amb la clau. Bona estada!"]],
+ q:[["Quantes nits es queda?",["Tres","Dues","Una setmana"],0],["On és l'esmorzar?",["Al primer pis","A l'habitació","Al bar del costat"],0],["Quin número té l'habitació?",["214","241","124"],0]]},
+{id:"ristorante", w:3, t:"Al ristorante", s:"Sopes amb un amic", p:["Cameriere","Cliente"], l:[
+ [0,"Buonasera! Siete in due?","Bona nit! Sou dos?"],
+ [1,"Sì, abbiamo prenotato alle nove.","Sí, hem reservat a les nou."],
+ [0,"Prego, accomodatevi. Ecco il menù. Da bere?","Endavant, seieu. Aquí teniu la carta. Per beure?"],
+ [1,"Una bottiglia d'acqua naturale e due birre medie.","Una ampolla d'aigua sense gas i dues cerveses mitjanes."],
+ [0,"Avete scelto?","Ja heu triat?"],
+ [1,"Per me gli spaghetti alla carbonara. Il mio amico prende una pizza margherita.","Per a mi els espaguetis a la carbonara. El meu amic pren una pizza margherita."],
+ [0,"Ottima scelta. Qualcos'altro?","Molt bona tria. Res més?"],
+ [1,"No, grazie. Poi ci porta il conto, per favore?","No, gràcies. Després ens porta el compte, si us plau?"]],
+ q:[["A quina hora havien reservat?",["A les nou","A les vuit","A les deu"],0],["Què beuen?",["Aigua i dues cerveses","Vi negre","Dues coca-coles"],0],["Què menja l'amic?",["Una pizza margherita","Espaguetis a la carbonara","Una amanida"],0]]},
+{id:"stazione", w:3, t:"Alla stazione", s:"Compres un bitllet de tren", p:["Impiegata","Viaggiatore"], l:[
+ [1,"Buongiorno, un biglietto per Firenze, per favore.","Bon dia, un bitllet per a Florència, si us plau."],
+ [0,"Solo andata o andata e ritorno?","Només anada o anada i tornada?"],
+ [1,"Andata e ritorno. Torno domenica sera.","Anada i tornada. Torno diumenge al vespre."],
+ [0,"C'è un treno alle dieci e un quarto. Arriva a Firenze alle undici e cinquanta.","Hi ha un tren a les deu i quart. Arriba a Florència a les dotze menys deu."],
+ [1,"Va bene. Da quale binario parte?","D'acord. De quina via surt?"],
+ [0,"Dal binario sei. Sono quarantotto euro in tutto.","De la via sis. Són quaranta-vuit euros en total."],
+ [1,"Posso pagare con la carta?","Puc pagar amb targeta?"],
+ [0,"Certo. Ricordi che il biglietto è anche sull'app.","És clar. Recordi que el bitllet també és a l'app."]],
+ q:[["On va el viatger?",["A Florència","A Roma","A Venècia"],0],["De quina via surt el tren?",["De la sis","De la dues","De la deu"],0],["Quant costa en total?",["48 €","28 €","84 €"],0]]},
+{id:"strada", w:4, t:"Scusi, dov'è…?", s:"Preguntes com arribar a un lloc", p:["Turista","Signora"], l:[
+ [0,"Mi scusi, sa dov'è il Duomo?","Perdoni, sap on és la catedral?"],
+ [1,"Sì, non è lontano. Vada dritto fino al semaforo.","Sí, no és lluny. Vagi recte fins al semàfor."],
+ [0,"E poi?","I després?"],
+ [1,"Poi giri a sinistra e prenda la seconda strada a destra. Il Duomo è in fondo alla piazza.","Després giri a l'esquerra i agafi el segon carrer a la dreta. La catedral és al fons de la plaça."],
+ [0,"Ci vuole molto a piedi?","Es triga molt a peu?"],
+ [1,"No, cinque o dieci minuti al massimo.","No, cinc o deu minuts com a molt."],
+ [0,"Grazie mille, molto gentile!","Moltes gràcies, molt amable!"],
+ [1,"Si figuri. Buona visita!","De res. Bona visita!"]],
+ q:[["Què busca el turista?",["La catedral","L'estació","Un museu"],0],["Què ha de fer al semàfor?",["Girar a l'esquerra","Girar a la dreta","Tornar enrere"],0],["Quant es triga a peu?",["Cinc o deu minuts","Mitja hora","Una hora"],0]]},
+{id:"mercato", w:4, t:"Al mercato", s:"Compres fruita i verdura", p:["Fruttivendolo","Cliente"], l:[
+ [0,"Buongiorno, signora! Cosa le do oggi?","Bon dia, senyora! Què li poso avui?"],
+ [1,"Vorrei un chilo di pomodori e mezzo chilo di fragole.","Voldria un quilo de tomàquets i mig quilo de maduixes."],
+ [0,"Le fragole sono buonissime oggi. Altro?","Les maduixes són boníssimes avui. Alguna cosa més?"],
+ [1,"Sì, tre limoni e un po' di basilico. Quanto costano le pesche?","Sí, tres llimones i una mica d'alfàbrega. Quant valen els préssecs?"],
+ [0,"Due euro al chilo. Ne vuole un po'?","Dos euros el quilo. En vol una mica?"],
+ [1,"No, grazie, per oggi basta così.","No, gràcies, per avui ja n'hi ha prou."],
+ [0,"Allora sono sette euro e cinquanta.","Doncs són set euros cinquanta."]],
+ q:[["Quants tomàquets compra?",["Un quilo","Mig quilo","Dos quilos"],0],["Compra préssecs?",["No","Sí, un quilo","Sí, mig quilo"],0],["Quant paga?",["7,50 €","5,70 €","2 €"],0]]},
+{id:"farmacia", w:5, t:"In farmacia", s:"No et trobes bé", p:["Farmacista","Cliente"], l:[
+ [0,"Buongiorno, mi dica.","Bon dia, digui'm."],
+ [1,"Buongiorno. Ho mal di gola e un po' di febbre da ieri.","Bon dia. Em fa mal la gola i tinc una mica de febre des d'ahir."],
+ [0,"Ha anche la tosse?","També té tos?"],
+ [1,"Sì, soprattutto la notte. Non riesco a dormire bene.","Sí, sobretot a la nit. No aconsegueixo dormir bé."],
+ [0,"Le do queste pastiglie per la gola e uno sciroppo per la tosse. Se la febbre non passa in tre giorni, vada dal medico.","Li dono aquestes pastilles per a la gola i un xarop per a la tos. Si la febre no passa en tres dies, vagi al metge."],
+ [1,"Quante volte al giorno devo prenderlo?","Quantes vegades al dia l'he de prendre?"],
+ [0,"Lo sciroppo tre volte al giorno, dopo i pasti. E beva molta acqua!","El xarop tres vegades al dia, després dels àpats. I begui molta aigua!"]],
+ q:[["Què li fa mal?",["La gola","L'estómac","El cap"],0],["Quan té més tos?",["A la nit","Al matí","Després de menjar"],0],["Quan ha d'anar al metge?",["Si la febre no passa en tres dies","Avui mateix","Mai"],0]]},
+{id:"telefono", w:5, t:"Al telefono", s:"Truques per reservar una taula", p:["Ristorante","Adam"], l:[
+ [0,"Pronto, Trattoria da Mario, buonasera.","Digui, Trattoria da Mario, bona nit."],
+ [1,"Buonasera. Vorrei prenotare un tavolo per sabato sera.","Bona nit. Voldria reservar una taula per dissabte al vespre."],
+ [0,"Per quante persone?","Per a quantes persones?"],
+ [1,"Per quattro, verso le otto e mezza.","Per a quatre, cap a dos quarts de nou."],
+ [0,"Mi dispiace, alle otto e mezza è tutto pieno. Va bene alle nove e un quarto?","Ho sento, a dos quarts de nou està tot ple. Li va bé a les nou i quart?"],
+ [1,"Sì, va bene lo stesso.","Sí, ja està bé."],
+ [0,"A che nome?","A quin nom?"],
+ [1,"González. Ah, una persona è vegetariana: è un problema?","González. Ah, una persona és vegetariana: és un problema?"],
+ [0,"Nessun problema, abbiamo tanti piatti vegetariani. A sabato!","Cap problema, tenim molts plats vegetarians. Fins dissabte!"]],
+ q:[["Per a quantes persones reserva?",["Quatre","Dues","Sis"],0],["A quina hora queda la reserva?",["A les nou i quart","A dos quarts de nou","A les vuit"],0],["Què pregunta l'Adam al final?",["Si hi ha plats vegetarians","Si accepten targeta","Si hi ha aparcament"],0]]},
+{id:"negozio", w:6, t:"In un negozio di vestiti", s:"Proves una jaqueta", p:["Commessa","Cliente"], l:[
+ [0,"Buongiorno! Posso aiutarla?","Bon dia! El puc ajudar?"],
+ [1,"Sì, cerco una giacca per l'inverno. Quella nera in vetrina.","Sí, busco una jaqueta per a l'hivern. Aquella negra de l'aparador."],
+ [0,"Che taglia porta?","Quina talla fa servir?"],
+ [1,"Di solito la cinquanta. Posso provarla?","Normalment la cinquanta. Me la puc emprovar?"],
+ [0,"Certo, i camerini sono in fondo. Come va?","És clar, els emprovadors són al fons. Com li va?"],
+ [1,"È un po' stretta. Ce l'avete più grande?","Em va una mica estreta. La teniu més gran?"],
+ [0,"Ecco la cinquantadue. E oggi c'è il venti per cento di sconto.","Aquí té la cinquanta-dos. I avui hi ha un vint per cent de descompte."],
+ [1,"Perfetto, questa va benissimo. La prendo!","Perfecte, aquesta em va molt bé. Me l'emporto!"]],
+ q:[["Che cosa cerca il cliente?",["Una giacca per l'inverno","Delle scarpe","Una camicia"],0],["Com'è la prima giacca?",["Un po' stretta","Troppo lunga","Troppo cara"],0],["Quale sconto c'è oggi?",["Il venti per cento","Il dieci per cento","Il cinquanta per cento"],0]]},
+{id:"weekend", w:6, t:"Com'è andato il weekend?", s:"Expliques què vas fer", p:["Luca","Sara"], l:[
+ [0,"Ciao Sara! Com'è andato il weekend?","Hola Sara! Com t'ha anat el cap de setmana?"],
+ [1,"Benissimo! Sabato sono andata al mare con le mie amiche.","Molt bé! Dissabte vaig anar a la platja amb les meves amigues."],
+ [0,"Che fortuna! Faceva caldo?","Quina sort! Feia calor?"],
+ [1,"Sì, c'era il sole. Abbiamo fatto il bagno e la sera abbiamo mangiato il pesce.","Sí, feia sol. Ens vam banyar i al vespre vam menjar peix."],
+ [0,"E domenica?","I diumenge?"],
+ [1,"Domenica ero stanchissima: sono rimasta a casa e ho visto un film. E tu?","Diumenge estava cansadíssima: em vaig quedar a casa i vaig veure una pel·lícula. I tu?"],
+ [0,"Io ho studiato tutto il weekend. Lunedì ho un esame!","Jo he estudiat tot el cap de setmana. Dilluns tinc un examen!"]],
+ q:[["Dove è andata Sara sabato?",["Al mare","In montagna","Al cinema"],0],["Che cosa ha fatto domenica?",["È rimasta a casa","È andata a una festa","Ha studiato"],0],["Perché Luca ha studiato?",["Lunedì ha un esame","Gli piace molto","Ha perso il lavoro"],0]]},
+{id:"calcio", w:7, inf:true, t:"Hai visto la partita?", s:"Dos amics parlen del partit d'ahir", p:["Marco","Davide"], l:[
+ [0,"Fra, hai visto la partita ieri sera?","Germà, vas veure el partit ahir a la nit?"],
+ [1,"Certo! Che partita, raga! Al novantesimo ho pensato: è finita.","És clar! Quin partit, nois! Al minut noranta vaig pensar: s'ha acabat."],
+ [0,"E invece gol all'ultimo secondo. Sono impazzito!","I en canvi, gol a l'últim segon. Em vaig tornar boig!"],
+ [1,"Però l'arbitro… un disastro. Quel rigore non c'era.","Però l'àrbitre… un desastre. Aquell penal no ho era."],
+ [0,"Dai, ci sta. Il primo tempo abbiamo giocato malissimo.","Va, és normal. A la primera part vam jugar fatal."],
+ [1,"Vero. Domenica c'è il derby: lo guardiamo insieme?","És veritat. Diumenge hi ha el derbi: el mirem junts?"],
+ [0,"Ovvio! Porto le birre, tu le pizze.","És clar! Jo porto les cerveses, tu les pizzes."]],
+ q:[["Quando hanno segnato il gol?",["All'ultimo secondo","Nel primo tempo","Non hanno segnato"],0],["Che cosa pensa Davide del rigore?",["Che non c'era","Che era giusto","Non l'ha visto"],0],["Che cosa porta Marco domenica?",["Le birre","Le pizze","Niente"],0]]},
+{id:"estate", w:7, t:"Che cosa farai quest'estate?", s:"Feu plans de vacances", p:["Chiara","Adam"], l:[
+ [0,"Hai già deciso cosa farai quest'estate?","Ja has decidit què faràs aquest estiu?"],
+ [1,"Sì! Andrò in Sicilia per due settimane. Visiterò Palermo e Siracusa.","Sí! Aniré a Sicília dues setmanes. Visitaré Palerm i Siracusa."],
+ [0,"Che bello! Ci andrai da solo?","Que bé! Hi aniràs sol?"],
+ [1,"No, verrà anche mio fratello. Noleggeremo una macchina.","No, també vindrà el meu germà. Llogarem un cotxe."],
+ [0,"Mangerai benissimo: gli arancini, la granita…","Menjaràs molt bé: els arancini, la granita…"],
+ [1,"E parlerò solo in italiano, promesso!","I parlaré només en italià, promès!"],
+ [0,"Bravo! Quando torni mi racconterai tutto.","Molt bé! Quan tornis m'ho explicaràs tot."]],
+ q:[["Dove andrà Adam?",["In Sicilia","In Sardegna","A Napoli"],0],["Con chi ci andrà?",["Con suo fratello","Da solo","Con Chiara"],0],["Come viaggeranno sull'isola?",["Con una macchina a noleggio","In treno","In bicicletta"],0]]},
+{id:"colloquio", w:8, t:"Il colloquio di lavoro", s:"Una entrevista de feina", p:["Responsabile","Candidato"], l:[
+ [0,"Buongiorno, si accomodi. Mi parli un po' di lei.","Bon dia, segui. Parli'm una mica de vostè."],
+ [1,"Buongiorno. Ho studiato economia e da due anni lavoro nel marketing.","Bon dia. Vaig estudiar economia i fa dos anys que treballo en màrqueting."],
+ [0,"Perché vorrebbe lavorare con noi?","Per què li agradaria treballar amb nosaltres?"],
+ [1,"Perché la vostra azienda lavora con l'estero e a me piacerebbe usare le lingue.","Perquè la vostra empresa treballa amb l'estranger i m'agradaria fer servir els idiomes."],
+ [0,"Quali lingue parla?","Quins idiomes parla?"],
+ [1,"Catalano, spagnolo e inglese. L'italiano lo sto imparando: per questo parlo piano!","Català, castellà i anglès. L'italià l'estic aprenent: per això parlo a poc a poc!"],
+ [0,"Lo parla già molto bene. Potrebbe cominciare a gennaio?","Ja el parla molt bé. Podria començar al gener?"],
+ [1,"Sì, sarebbe perfetto.","Sí, seria perfecte."]],
+ q:[["Che cosa ha studiato il candidato?",["Economia","Ingegneria","Lingue"],0],["Perché vorrebbe lavorare in questa azienda?",["Per usare le lingue","Perché paga molto","Perché è vicina a casa"],0],["Quando potrebbe cominciare?",["A gennaio","Subito","A settembre"],0]]},
+{id:"stasera", w:9, inf:true, t:"Che si fa stasera?", s:"Dos amics queden per sortir", p:["Sara","Luca"], l:[
+ [0,"Bella! Che si fa stasera?","Ei! Què fem aquesta nit?"],
+ [1,"Boh, non lo so. Sono un po' cotto, oggi è stata una giornata pesante.","Ni idea. Estic una mica rebentat, avui ha estat un dia pesat."],
+ [0,"Dai, usciamo un attimo! C'è un aperitivo sui Navigli, ci sono anche Giulia e Marco.","Va, sortim una estona! Hi ha un aperitiu als Navigli, també hi seran la Giulia i en Marco."],
+ [1,"Mmm… che sbatti prendere la metro adesso.","Mmm… quin pal agafar el metro ara."],
+ [0,"Ti passo a prendere io in macchina. Dieci minuti e sono lì.","Et passo a buscar jo amb cotxe. Deu minuts i hi soc."],
+ [1,"Ok, ci sta. Ma torniamo presto, eh? Domani lavoro.","D'acord, ja va bé. Però tornem d'hora, eh? Demà treballo."],
+ [0,"Tranqui, promesso. A dopo!","Tranquil, promès. Fins ara!"]],
+ q:[["Come si sente Luca?",["Stanco","Felice","Malato"],0],["Perché non vuole prendere la metro?",["Gli pesa, non ne ha voglia","È chiusa","Non ha il biglietto"],0],["Come andranno all'aperitivo?",["In macchina con Sara","In metro","A piedi"],0]]},
+{id:"aeroporto", w:10, t:"All'aeroporto", s:"Han perdut la teva maleta", p:["Impiegato","Viaggiatore"], l:[
+ [1,"Buonasera. La mia valigia non è arrivata.","Bona nit. La meva maleta no ha arribat."],
+ [0,"Mi dispiace. Da dove arrivava il suo volo?","Ho sento. D'on venia el seu vol?"],
+ [1,"Da Barcellona. Ho aspettato quaranta minuti, ma sul nastro non c'era.","De Barcelona. He esperat quaranta minuts, però no era a la cinta."],
+ [0,"Mi può descrivere la valigia?","Em pot descriure la maleta?"],
+ [1,"È grande, blu, con un nastro rosso sulla maniglia.","És gran, blava, amb una cinta vermella a la nansa."],
+ [0,"Probabilmente è rimasta a Barcellona. Arriverà con il volo di domani mattina e gliela porteremo in albergo.","Probablement s'ha quedat a Barcelona. Arribarà amb el vol de demà al matí i li portarem a l'hotel."],
+ [1,"Meno male! E stasera come faccio senza i miei vestiti?","Menys mal! I aquesta nit com ho faig sense la meva roba?"],
+ [0,"Può comprare quello che le serve e conservare lo scontrino: la compagnia la rimborserà.","Pot comprar el que necessiti i guardar el tiquet: la companyia li ho reemborsarà."]],
+ q:[["Da dove arrivava il volo?",["Da Barcellona","Da Madrid","Da Parigi"],0],["Com'è la valigia?",["Grande e blu","Piccola e nera","Rossa"],0],["Che cosa deve conservare il viaggiatore?",["Lo scontrino","La carta d'imbarco","Il passaporto"],0]]},
+{id:"concerto", w:10, inf:true, t:"Dopo il concerto", s:"Sortiu d'un concert de trap", p:["Davide","Adam"], l:[
+ [0,"Zio, che concerto! Mi sono gasato un sacco.","Tio, quin concert! M'ha flipat moltíssim."],
+ [1,"Anch'io! Quando ha fatto il pezzo nuovo è esploso tutto lo stadio.","Jo també! Quan ha fet la cançó nova ha esclatat tot l'estadi."],
+ [0,"Spacca troppo quella canzone. Hai capito il testo?","Aquella cançó és la bomba. Has entès la lletra?"],
+ [1,"Più o meno… parla veloce e usa tanto slang. Ma ho capito il ritornello!","Més o menys… parla ràpid i fa servir molt d'slang. Però he entès la tornada!"],
+ [0,"Grande! Fra un po' capirai tutto. Adesso andiamo a mangiare qualcosa?","Molt bé! D'aquí a poc ho entendràs tot. Ara anem a menjar alguna cosa?"],
+ [1,"Sì, sto morendo di fame. Un panino al volo?","Sí, em moro de gana. Un entrepà ràpid?"],
+ [0,"Andata. Conosco un posto qui dietro che è una bomba.","Fet. Conec un lloc aquí darrere que és boníssim."]],
+ q:[["Che cosa è successo con il pezzo nuovo?",["È esploso tutto lo stadio","Non l'hanno suonato","Si è fermato il concerto"],0],["Che cosa ha capito Adam?",["Il ritornello","Tutto il testo","Niente"],0],["Che cosa vanno a fare dopo?",["A mangiare un panino","A casa","A un altro concerto"],0]]},
+{id:"viaggio", w:11, t:"Racconto di viaggio", s:"Expliques un viatge a una amiga", p:["Giulia","Adam"], l:[
+ [0,"Allora, com'è stato il viaggio a Roma?","I doncs, com va anar el viatge a Roma?"],
+ [1,"Fantastico! Quando sono arrivato pioveva, ma poi è uscito il sole.","Fantàstic! Quan vaig arribar plovia, però després va sortir el sol."],
+ [0,"Che cosa hai visto?","Què vas veure?"],
+ [1,"Il Colosseo, i Musei Vaticani… e ho camminato tantissimo per Trastevere.","El Colosseu, els Museus Vaticans… i vaig caminar moltíssim per Trastevere."],
+ [0,"E hai parlato in italiano?","I vas parlar en italià?"],
+ [1,"Sempre! All'inizio ero nervoso, ma la gente era gentilissima. Un signore mi ha detto che parlavo bene!","Sempre! Al principi estava nerviós, però la gent era amabilíssima. Un senyor em va dir que parlava bé!"],
+ [0,"Te l'avevo detto! Se continui così, l'anno prossimo arriverai al B1.","Ja t'ho havia dit! Si continues així, l'any que ve arribaràs al B1."],
+ [1,"Speriamo! Mi piacerebbe tornare in Italia per un mese intero.","Tant de bo! M'agradaria tornar a Itàlia un mes sencer."]],
+ q:[["Che tempo faceva quando è arrivato?",["Pioveva","C'era il sole","Nevicava"],0],["Come si sentiva all'inizio?",["Nervoso","Stanco","Triste"],0],["Che cosa gli piacerebbe fare?",["Tornare in Italia per un mese","Vivere a Roma","Studiare il tedesco"],0]]}
+];
+
+/* Frases útils per situacions: [categoria, italià, català]. Entren al seu propi repàs espaiat. */
+const FRASI_CAT = ["Cortesia","Presentar-se","Bar i restaurant","Compres","Transport","Orientar-se","Hotel i casa","Salut","Telèfon i cites","Opinions i sentiments","Conversa","Problemes i ajuda"];
+const FRASI = [
+[0,"Per favore.","Si us plau."],[0,"Grazie mille!","Moltes gràcies!"],[0,"Prego.","De res. / Endavant."],[0,"Scusi, posso…?","Perdoni, puc…?"],[0,"Mi dispiace.","Ho sento."],[0,"Non fa niente.","No passa res."],[0,"Buona giornata!","Bon dia! (en acomiadar-se)"],[0,"Altrettanto!","Igualment!"],[0,"Ci vediamo domani.","Ens veiem demà."],[0,"A presto!","Fins aviat!"],[0,"Permesso?","Puc passar? / Amb permís?"],[0,"Salute!","Jesús! (quan algú esternuda)"],
+[1,"Piacere di conoscerti.","Encantat de conèixer-te."],[1,"Mi chiamo Adam, e tu?","Em dic Adam, i tu?"],[1,"Sono di Barcellona.","Soc de Barcelona."],[1,"Ho ventisei anni.","Tinc vint-i-sis anys."],[1,"Studio l'italiano da poco.","Fa poc que estudio italià."],[1,"Che lavoro fai?","De què treballes?"],[1,"Abito con i miei genitori.","Visc amb els meus pares."],[1,"Nel tempo libero gioco a calcio.","En el temps lliure jugo a futbol."],[1,"Mi piace molto la musica.","M'agrada molt la música."],[1,"Parli inglese?","Parles anglès?"],[1,"Questo è il mio amico Marco.","Aquest és el meu amic Marco."],[1,"Come stai?","Com estàs?"],
+[2,"Un tavolo per due, per favore.","Una taula per a dos, si us plau."],[2,"Vorrei un caffè.","Voldria un cafè."],[2,"Che cosa mi consiglia?","Què em recomana?"],[2,"Il conto, per favore.","El compte, si us plau."],[2,"Posso pagare con la carta?","Puc pagar amb targeta?"],[2,"Sono vegetariano.","Soc vegetarià."],[2,"Sono allergico alle noci.","Soc al·lèrgic a les nous."],[2,"È tutto buonissimo!","Tot és boníssim!"],[2,"Un bicchiere d'acqua, per favore.","Un got d'aigua, si us plau."],[2,"Il menù del giorno, per favore.","El menú del dia, si us plau."],[2,"Da portare via.","Per emportar."],[2,"Paghiamo alla romana?","Paguem a mitges?"],[2,"Abbiamo prenotato a nome González.","Hem reservat a nom de González."],
+[3,"Quanto costa?","Quant costa?"],[3,"Sto solo guardando, grazie.","Només miro, gràcies."],[3,"Posso provarlo?","Me'l puc emprovar?"],[3,"Avete una taglia più piccola?","Teniu una talla més petita?"],[3,"È troppo caro.","És massa car."],[3,"Lo prendo.","Me l'emporto."],[3,"Mi fa uno sconto?","Em fa un descompte?"],[3,"Dov'è la cassa?","On és la caixa?"],[3,"Mi dà una busta, per favore?","Em dona una bossa, si us plau?"],[3,"A che ora chiudete?","A quina hora tanqueu?"],[3,"Posso cambiarlo?","El puc canviar?"],[3,"Mi dà lo scontrino, per favore?","Em dona el tiquet, si us plau?"],
+[4,"Un biglietto per Roma, per favore.","Un bitllet per a Roma, si us plau."],[4,"Andata e ritorno.","Anada i tornada."],[4,"A che ora parte il treno?","A quina hora surt el tren?"],[4,"Da quale binario parte?","De quina via surt?"],[4,"Il treno è in ritardo.","El tren va amb retard."],[4,"Dove si comprano i biglietti?","On es compren els bitllets?"],[4,"Devo cambiare?","He de fer transbord?"],[4,"Questo posto è libero?","Aquest seient és lliure?"],[4,"Mi chiama un taxi, per favore?","Em demana un taxi, si us plau?"],[4,"Quanto ci vuole per arrivare?","Quant es triga a arribar-hi?"],[4,"Ho perso il treno.","He perdut el tren."],[4,"A che ora è l'imbarco?","A quina hora és l'embarcament?"],
+[5,"Scusi, dov'è la stazione?","Perdoni, on és l'estació?"],[5,"È lontano da qui?","És lluny d'aquí?"],[5,"Vada sempre dritto.","Vagi sempre recte."],[5,"Giri a destra.","Giri a la dreta."],[5,"Giri a sinistra.","Giri a l'esquerra."],[5,"È qui vicino.","És aquí a prop."],[5,"Mi sono perso.","M'he perdut."],[5,"Mi può indicare sulla mappa?","M'ho pot indicar al mapa?"],[5,"C'è una farmacia qui vicino?","Hi ha una farmàcia aquí a prop?"],[5,"Si può andare a piedi?","S'hi pot anar a peu?"],[5,"All'angolo.","A la cantonada."],[5,"In fondo alla strada.","Al final del carrer."],
+[6,"Ho una prenotazione.","Tinc una reserva."],[6,"Avete una camera libera?","Teniu alguna habitació lliure?"],[6,"A che ora è la colazione?","A quina hora és l'esmorzar?"],[6,"Qual è la password del wifi?","Quina és la contrasenya del wifi?"],[6,"Il riscaldamento non funziona.","La calefacció no funciona."],[6,"Posso lasciare la valigia qui?","Puc deixar la maleta aquí?"],[6,"A che ora devo lasciare la camera?","A quina hora he de deixar l'habitació?"],[6,"Manca la carta igienica.","Falta paper higiènic."],[6,"Mi può svegliare alle sette?","Em pot despertar a les set?"],[6,"Faccio il check-out.","Faig el check-out. / Marxo de l'hotel."],
+[7,"Non mi sento bene.","No em trobo bé."],[7,"Mi fa male la testa.","Em fa mal el cap."],[7,"Ho la febbre.","Tinc febre."],[7,"Ho bisogno di un medico.","Necessito un metge."],[7,"Dov'è l'ospedale più vicino?","On és l'hospital més proper?"],[7,"Ho preso il raffreddore.","M'he refredat."],[7,"Prendo questa medicina due volte al giorno.","Prenc aquest medicament dues vegades al dia."],[7,"Chiamate un'ambulanza!","Truqueu una ambulància!"],[7,"Mi sono fatto male al piede.","M'he fet mal al peu."],[7,"Sto meglio, grazie.","Estic millor, gràcies."],
+[8,"Pronto?","Digui? / Sí? (en respondre el telèfon)"],[8,"Chi parla?","Qui parla?"],[8,"Posso parlare con Marco?","Puc parlar amb en Marco?"],[8,"Richiamo più tardi.","Torno a trucar més tard."],[8,"Non ti sento bene.","No et sento bé."],[8,"Ci vediamo alle otto?","Ens veiem a les vuit?"],[8,"Sei libero sabato?","Estàs lliure dissabte?"],[8,"Va bene per me.","Em va bé."],[8,"Facciamo un'altra volta?","Ho deixem per un altre dia?"],[8,"Arrivo tra dieci minuti.","Arribo d'aquí a deu minuts."],[8,"Scusa il ritardo!","Perdona el retard!"],[8,"Mandami un messaggio.","Envia'm un missatge."],
+[9,"Secondo me…","Segons el meu parer… / Per a mi…"],[9,"Sono d'accordo.","Hi estic d'acord."],[9,"Non sono d'accordo.","No hi estic d'acord."],[9,"Mi piace un sacco!","M'agrada moltíssim!"],[9,"Non mi va.","No en tinc ganes."],[9,"Che bello!","Que bonic! / Que bé!"],[9,"Che peccato!","Quina llàstima!"],[9,"Sono stanco morto.","Estic mort de cansament."],[9,"Sono contentissimo.","Estic contentíssim."],[9,"Che noia!","Quin avorriment!"],[9,"Ho paura.","Tinc por."],[9,"Non vedo l'ora!","Tinc moltes ganes! / No puc esperar!"],
+[10,"Come si dice … in italiano?","Com es diu … en italià?"],[10,"Puoi ripetere, per favore?","Pots repetir, si us plau?"],[10,"Più piano, per favore.","Més a poc a poc, si us plau."],[10,"Non ho capito.","No ho he entès."],[10,"Cosa vuol dire?","Què vol dir?"],[10,"Davvero?","De debò?"],[10,"Dipende.","Depèn."],[10,"Infatti.","Efectivament. / De fet."],[10,"Comunque…","De totes maneres…"],[10,"Allora…","Doncs… / Aleshores…"],[10,"Per esempio…","Per exemple…"],[10,"Insomma…","En resum… / Total, que…"],
+[11,"Aiuto!","Ajuda!"],[11,"Mi può aiutare?","Em pot ajudar?"],[11,"Ho perso il portafoglio.","He perdut la cartera."],[11,"Mi hanno rubato il telefono.","M'han robat el telèfon."],[11,"Dov'è la polizia?","On és la policia?"],[11,"C'è un errore nel conto.","Hi ha un error al compte."],[11,"Non funziona.","No funciona."],[11,"Non trovo le chiavi.","No trobo les claus."],[11,"È urgente.","És urgent."],[11,"Non è colpa mia.","No és culpa meva."],[11,"Può scriverlo, per favore?","M'ho pot escriure, si us plau?"],[11,"Va tutto bene.","Va tot bé."]
+];
+
+/* Slang i italià col·loquial: [expressió, significat, etiqueta, exemple italià, exemple català].
+   Etiquetes: c = col·loquial, j = juvenil, t = trap i música, f = futbol, r = regional, v = vulgar (entén-la, però vigila on la dius). */
+const SLANG_TAG = {c:["Col·loquial","Es diu a tot arreu, amb amics i família."], j:["Juvenil","El fan servir sobretot els joves i les xarxes."], t:["Trap i música","El sentiràs a les cançons i als vídeos."], f:["Futbol","Dels comentaristes i els aficionats."], r:["Regional","Típic d'una ciutat o regió."], v:["Vulgar","Entén-la, però no la diguis a qualsevol."]};
+const SLANG = [
+["boh","ni idea, no ho sé","c","Dove andiamo stasera? — Boh, decidi tu.","On anem aquesta nit? — Ni idea, decideix tu."],
+["dai!","va!, vinga!; també «no fotis!»","c","Dai, andiamo che è tardi!","Va, anem que és tard!"],
+["magari!","tant de bo!; també «potser»","c","Vieni con noi in Sicilia? — Magari!","Véns amb nosaltres a Sicília? — Tant de bo!"],
+["figo","guai, xulo","c","Che figo il tuo telefono nuovo!","Que guai el teu mòbil nou!"],
+["che figata!","quina passada!","c","Il concerto è stato una figata.","El concert ha estat una passada."],
+["un casino","un embolic; també «un munt»","c","Ho un casino di cose da fare.","Tinc un munt de coses per fer."],
+["un sacco","molt, un munt","c","Mi piace un sacco questa canzone.","M'agrada moltíssim aquesta cançó."],
+["un botto","moltíssim (sobretot diners)","c","Quelle scarpe costano un botto.","Aquelles sabates costen un dineral."],
+["essere cotto","estar rebentat; també estar molt enamorat","c","Stasera non esco, sono cotto.","Aquesta nit no surto, estic rebentat."],
+["fare schifo","fer fàstic, ser horrible","c","Questo film fa proprio schifo.","Aquesta pel·lícula és horrible."],
+["non mi va","no en tinc ganes","c","Andiamo a correre? — No, oggi non mi va.","Anem a córrer? — No, avui no en tinc ganes."],
+["tipo","en plan, com ara (crossa)","c","Era tipo mezzanotte quando è arrivato.","Era en plan mitjanit quan va arribar."],
+["cioè","o sigui","c","Cioè, non ci posso credere!","O sigui, no m'ho puc creure!"],
+["vabbè","bé, d'acord (resignat)","c","Vabbè, ci vediamo domani allora.","Bé, doncs ens veiem demà."],
+["mannaggia!","vatua!, ostres!","c","Mannaggia, ho perso l'autobus!","Ostres, he perdut l'autobús!"],
+["figurati!","no et preocupis; de res","c","Grazie dell'aiuto! — Figurati!","Gràcies per l'ajuda! — De res, home!"],
+["ma dai!","no fotis!, de debò?","c","Ho vinto la partita. — Ma dai!","He guanyat el partit. — No fotis!"],
+["in bocca al lupo!","molta sort! (es respon «crepi!»)","c","Domani ho l'esame. — In bocca al lupo! — Crepi!","Demà tinc l'examen. — Molta sort! — Gràcies!"],
+["fare la scarpetta","sucar pa a la salsa del plat","c","Questo sugo è buonissimo, faccio la scarpetta.","Aquesta salsa és boníssima, sucaré pa."],
+["avere la luna storta","estar de mal humor","c","Oggi il capo ha la luna storta.","Avui el cap està de mal humor."],
+["fare il ponte","fer pont","c","Giovedì è festa e venerdì facciamo il ponte.","Dijous és festa i divendres fem pont."],
+["al volo","ràpidament, de passada","c","Mangio un panino al volo e arrivo.","Menjo un entrepà ràpid i vinc."],
+["beccarsi","veure's, trobar-se","c","Ci becchiamo dopo in piazza?","Ens veiem després a la plaça?"],
+["dare buca","deixar plantat","c","Mi ha dato buca un'altra volta!","M'ha deixat plantat una altra vegada!"],
+["sgamare","enxampar, descobrir","c","La prof mi ha sgamato col telefono.","La profe m'ha enxampat amb el mòbil."],
+["sbattersi","esforçar-se molt, escarrassar-se","c","Mi sono sbattuto tutto il giorno per finire.","M'he escarrassat tot el dia per acabar."],
+["fregarsene","passar de, importar un rave","c","Me ne frego di quello che dicono.","Passo del que diguin."],
+["rompere le scatole","molestar, emprenyar","c","Smettila di rompere le scatole!","Deixa d'emprenyar!"],
+["che palle!","quin pal! (una mica groller)","c","Che palle, piove di nuovo.","Quin pal, torna a ploure."],
+["ci mancherebbe","faltaria més","c","Posso usare il bagno? — Ci mancherebbe!","Puc fer servir el lavabo? — Faltaria més!"],
+["fare serata","sortir de festa","c","Sabato facciamo serata in centro.","Dissabte sortim de festa pel centre."],
+["fare il fenomeno","fer-se el xulo","c","Smettila di fare il fenomeno!","Deixa de fer-te el xulo!"],
+["a palla","al màxim (volum, velocitat)","j","In macchina ascoltiamo la musica a palla.","Al cotxe escoltem la música a tota castanya."],
+["spaccare","ser la bomba, petar-ho","j","Questo pezzo spacca!","Aquesta cançó és la bomba!"],
+["gasare / essere gasato","flipar; estar molt emocionat","j","Sono gasatissimo per il viaggio.","Estic flipant amb el viatge."],
+["sclerare","perdre els papers, tornar-se boig","j","Se non finisco stasera, sclero.","Si no acabo aquesta nit, perdo els papers."],
+["che sbatti","quin pal, quina mandra","j","Che sbatti prendere due treni.","Quin pal agafar dos trens."],
+["ci sta","té sentit; ja va bé; és normal","j","Andiamo a mangiare una pizza? — Ci sta!","Anem a menjar una pizza? — Va bé!"],
+["bella!","ei! (salutació)","j","Bella raga, come va?","Ei nois, què tal?"],
+["raga","nois, gent (de «ragazzi»)","j","Raga, ci muoviamo?","Nois, ens movem?"],
+["tranqui","tranquil","j","Tranqui, ci penso io.","Tranquil, ja m'hi poso jo."],
+["top","genial, el millor","j","La pizza di quel posto è top.","La pizza d'aquell lloc és top."],
+["cringe","vergonya aliena","j","Quel video è troppo cringe.","Aquell vídeo fa massa vergonya aliena."],
+["che ansia!","quins nervis!, quina angoixa!","j","Domani ho l'orale, che ansia!","Demà tinc l'oral, quins nervis!"],
+["in para","rallat, paranoic","j","Non andare in para, andrà tutto bene.","No et rallis, anirà tot bé."],
+["mi prende bene","em mola, em fa bon rotllo","j","Questa canzone mi prende troppo bene.","Aquesta cançó em mola moltíssim."],
+["svoltare","canviar a millor, triomfar","j","Con quel lavoro ha svoltato.","Amb aquella feina li ha canviat la vida."],
+["limonare","morrejar-se","j","Li ho visti limonare al parco.","Els he vist morrejant-se al parc."],
+["stra-","molt, súper (prefix)","j","È strabuono questo gelato!","És súper bo aquest gelat!"],
+["skillato","molt hàbil (jocs, esports)","j","È skillatissimo a FIFA.","És un crac al FIFA."],
+["fra / frate","germà, col·lega","t","Fra, ci vediamo dopo.","Germà, ens veiem després."],
+["zio","tio, col·lega","t","Zio, che storia!","Tio, quina història!"],
+["bro","bro, col·lega","t","Grazie bro, sei un grande.","Gràcies bro, ets un crac."],
+["flexare","fardar","t","Flexa con la macchina nuova.","Farda amb el cotxe nou."],
+["drip","estil de roba, anar ben vestit","t","Guarda che drip che ha!","Mira quin estil que té!"],
+["pezzo","cançó, tema","t","È uscito il suo pezzo nuovo: è una bomba.","Ha sortit la seva cançó nova: és la bomba."],
+["feat","col·laboració (cançó amb un altre artista)","t","Questo è un feat con due rapper di Milano.","Aquesta és una col·laboració amb dos rapers de Milà."],
+["dissing","cançó o vers per atacar un altre artista","t","Ha fatto un dissing contro di lui.","Li ha tret una cançó atacant-lo."],
+["la gang","la colla, el grup d'amics","t","Stasera esco con la gang.","Aquesta nit surto amb la colla."],
+["fare i soldi","fer diners","t","Voglio fare i soldi con la musica.","Vull fer diners amb la música."],
+["la zona","el barri","t","Rappresento la mia zona.","Represento el meu barri."],
+["bomber","golejador; també «crac» entre amics","f","È un bomber, segna sempre.","És un golejador, sempre marca."],
+["mister","entrenador","f","Il mister ha cambiato tre giocatori.","L'entrenador ha fet tres canvis."],
+["zona Cesarini","els últims minuts del partit","f","Gol in zona Cesarini!","Gol en l'últim minut!"],
+["fare panchina","quedar-se a la banqueta","f","Oggi il capitano fa panchina.","Avui el capità es queda a la banqueta."],
+["una papera","una errada del porter, una cantada","f","Il portiere ha fatto una papera clamorosa.","El porter ha fet una cantada clamorosa."],
+["fare un tunnel","fer un túnel, passar la pilota entre les cames","f","Gli ha fatto un tunnel bellissimo.","Li ha fet un túnel boníssim."],
+["il cucchiaio","penal xutat suau pel mig (a lo Panenka)","f","Ha segnato il rigore col cucchiaio.","Ha marcat el penal a lo Panenka."],
+["rovesciata","xilena","f","Che gol in rovesciata!","Quin gol de xilena!"],
+["catenaccio","defensa molt tancada","f","Hanno giocato col catenaccio tutta la partita.","Han jugat tancats a la defensa tot el partit."],
+["prendere un palo","xutar al pal","f","Abbiamo preso due pali!","Hem fet dos pals!"],
+["rosicare","rabiar (d'enveja o per haver perdut)","f","Hai perso il derby e rosichi, eh?","Has perdut el derbi i rabies, eh?"],
+["gufare","portar mala sort desitjant que l'altre perdi","f","Smettila di gufare, vinciamo noi!","Deixa de portar mala sort, guanyarem nosaltres!"],
+["gli ultras","els aficionats radicals","f","Gli ultras cantano tutta la partita.","Els ultres canten tot el partit."],
+["daje!","som-hi!, vinga! (Roma)","r","Daje, che ce la facciamo!","Som-hi, que ho aconseguirem!"],
+["annamo","anem (Roma)","r","Annamo a magnà!","Anem a menjar!"],
+["ammazza!","ostres! (Roma)","r","Ammazza quanto sei alto!","Ostres, que n'ets d'alt!"],
+["scialla","tranquil, relax (Roma)","r","Scialla, c'è tempo.","Tranquil, hi ha temps."],
+["avoja","i tant!, moltíssim (Roma)","r","C'è gente? — Avoja!","Hi ha gent? — I tant!"],
+["taaac","fet!, ja està! (Milà)","r","Prenotato il tavolo, taaac!","Taula reservada, fet!"],
+["pirla","beneit, ximple (Milà)","r","Non fare il pirla!","No facis el ximple!"],
+["uè","ei! (Nàpols i Milà)","r","Uè, come stai?","Ei, com estàs?"],
+["jamme","anem (Nàpols)","r","Jamme, è tardi!","Anem, que és tard!"],
+["guaglione","noi, xaval (Nàpols)","r","Quel guaglione gioca benissimo.","Aquell xaval juga molt bé."],
+["boia!","mare meva! (Toscana i Emília)","r","Boia che freddo stamattina!","Mare meva, quin fred aquest matí!"],
+["cazzo","merda!, collons! (interjecció)","v","Cazzo, ho dimenticato le chiavi!","Merda, m'he oblidat les claus!"],
+["non me ne frega un cazzo","m'importa una merda","v","Non me ne frega un cazzo della partita.","M'importa una merda el partit."],
+["incazzato","emprenyat, cabrejat","v","Il mister era incazzatissimo.","L'entrenador estava cabrejadíssim."],
+["che culo!","quina sort!","v","Hai vinto? Che culo!","Has guanyat? Quina sort!"],
+["stronzo","imbècil, cabró","v","Non fare lo stronzo.","No facis el cabró."],
+["sticazzi","i a mi què (Roma)","v","Ha comprato una Ferrari. — Sticazzi.","S'ha comprat un Ferrari. — I a mi què."],
+["vaffanculo","vés a la merda","v","Gli ha detto vaffanculo davanti a tutti.","L'ha enviat a la merda davant de tothom."],
+["rompere i coglioni","tocar els collons","v","Non rompere i coglioni, dai.","No toquis els collons, va."],
+["minchia!","collons! (Sicília)","v","Minchia, che caldo!","Collons, quina calor!"],
+["belin!","collons! (Gènova)","v","Belin, che traffico!","Collons, quin trànsit!"]
+];
+
+/* Nivell A2: llista de «sé fer» (basada en els descriptors del Marc europeu) i un examen de prova. */
+const CANDO = [
+["Escoltar",[
+ "Entenc frases i paraules sobre temes molt propers: família, compres, feina, el barri.",
+ "Entenc la idea principal d'avisos i missatges curts i clars (estació, botiga, megafonia).",
+ "Entenc el tema d'una conversa senzilla quan parlen a poc a poc.",
+ "Entenc les indicacions per anar d'un lloc a un altre.",
+ "Entenc els números, els preus i les hores quan me'ls diuen."]],
+["Llegir",[
+ "Llegeixo textos curts i senzills i hi trobo informació concreta (menús, horaris, anuncis).",
+ "Entenc cartes, correus i missatges personals curts.",
+ "Entenc instruccions i rètols habituals dels llocs públics.",
+ "Segueixo una història curta escrita amb paraules freqüents."]],
+["Parlar",[
+ "Em presento i parlo de la meva família, els estudis i la feina.",
+ "Demano i dono informació bàsica: preus, hores, on és un lloc.",
+ "Em desenvolupo en un bar, un restaurant, una botiga o una estació.",
+ "Explico què vaig fer el cap de setmana o en un viatge.",
+ "Parlo dels meus plans: què faré demà, aquest estiu, l'any que ve.",
+ "Dic què m'agrada, què no, i per què, amb frases senzilles.",
+ "Proposo un pla, accepto o refuso una invitació."]],
+["Escriure",[
+ "Escric notes i missatges curts sobre coses del dia a dia.",
+ "Escric una carta o un correu personal molt senzill per agrair o explicar alguna cosa.",
+ "Descric amb frases simples la meva rutina, casa meva o una persona.",
+ "Explico un fet passat amb connectors (prima, poi, alla fine, perché)."]]
+];
+/* Examen de prova A2: lectura, escolta, llengua i escriptura. */
+const MOCK = {
+ read:[
+  {t:"Annuncio", text:"AFFITTASI. Camera singola in appartamento di tre stanze, zona Università. La camera è luminosa e ha un letto, un armadio e una scrivania. Cucina e bagno in comune con due studentesse. 380 euro al mese, spese incluse. Non si accettano animali. Libera dal 1° febbraio. Per informazioni chiamare Paola dopo le 18.",
+   q:[["Per chi è la stanza?",["Per una persona","Per due persone","Per una famiglia"],0],["Che cosa è incluso nel prezzo?",["Le spese","Il garage","La colazione"],0],["Quando è libera la camera?",["Dal primo febbraio","Da subito","Da settembre"],0],["Quando si può chiamare Paola?",["Dopo le sei di sera","La mattina","Solo il sabato"],0]]},
+  {t:"Messaggio", text:"Ciao Marta! Scusa se non ti ho risposto ieri, ma ero al lavoro fino a tardi. Sabato purtroppo non posso venire alla tua festa perché vado a Torino da mia nonna: compie novant'anni! Però domenica sera torno. Ti va di vederci lunedì per un caffè? Così mi racconti tutto e ti porto il regalo. Un abbraccio, Elena",
+   q:[["Perché Elena non ha risposto ieri?",["Lavorava fino a tardi","Era malata","Non aveva il telefono"],0],["Perché non va alla festa?",["Va dalla nonna a Torino","Deve lavorare","Non le piacciono le feste"],0],["Che cosa propone Elena?",["Un caffè lunedì","Una cena sabato","Un viaggio a Torino"],0],["Che cosa porterà Elena?",["Un regalo","Una torta","Dei fiori"],0]]}],
+ listen:[
+  {t:"Alla stazione", p:["Voce","Voce"], l:[[0,"Attenzione, il treno regionale delle quindici e dieci per Bologna partirà dal binario sette invece che dal binario tre. Il treno viaggia con circa venti minuti di ritardo. Ci scusiamo per il disagio."]],
+   q:[["Dove va il treno?",["A Bologna","A Venezia","A Roma"],0],["Da quale binario parte adesso?",["Dal sette","Dal tre","Dal dieci"],0],["Quanto ritardo ha?",["Circa venti minuti","Un'ora","Dieci minuti"],0]]},
+  {t:"Un invito", p:["Luca","Anna"], l:[[0,"Anna, venerdì sera faccio una cena a casa mia. Vieni?"],[1,"Venerdì? Mi piacerebbe, ma finisco di lavorare alle nove."],[0,"Non c'è problema, mangiamo tardi. Porta anche tuo fratello, se vuole."],[1,"Perfetto! Allora porto io il dolce: un tiramisù."]],
+   q:[["Quando è la cena?",["Venerdì sera","Sabato a pranzo","Domenica"],0],["Perché Anna arriverà tardi?",["Lavora fino alle nove","Ha un esame","Abita lontano"],0],["Che cosa porta Anna?",["Il tiramisù","Il vino","La pizza"],0]]}],
+ lang:[
+  ["Ieri sera ___ al cinema con Marco.",["sono andato","ho andato","vado"],0],
+  ["Questa è la casa ___ miei nonni.",["dei","di","dai"],0],
+  ["Domani ___ presto perché ho un treno.",["mi sveglierò","mi svegliavo","svegliato"],0],
+  ["Quando ero piccolo ___ sempre a calcio.",["giocavo","ho giocato","giocherò"],0],
+  ["Ti piace la pizza? Sì, ___ piace molto.",["mi","ti","gli"],0],
+  ["Hai visto Giulia? No, non ___ ho vista.",["l'","la","le"],0],
+  ["Vado ___ Roma ___ treno.",["a… in","in… a","da… con"],0],
+  ["Se vuoi, ___ aiuto io con i compiti.",["ti","tu","te"],0],
+  ["Mi ___ un caffè, per favore?",["porterebbe","porterei","portato"],0],
+  ["Sono in Italia ___ tre mesi.",["da","per","fa"],0]],
+ write:"Scrivi un'e-mail a un amico italiano (60–80 parole): raccontagli che cosa hai fatto lo scorso fine settimana e invitalo a fare qualcosa insieme il prossimo sabato.",
+ wcheck:["He fet servir el passat (passato prossimo) per explicar el cap de setmana.","He fet una invitació clara: què, quan i on.","He començat i acabat el correu com cal (Ciao…, Un abbraccio…).","Té entre 60 i 80 paraules."]
+};
+
 /* ================= utilitats ================= */
 const POS = {art:"article",prep:"preposició",pron:"pronom",conj:"conjunció",adv:"adverbi",v:"verb",nm:"nom masculí",nf:"nom femení",adj:"adjectiu",num:"numeral",int:"interjecció",loc:"expressió",det:"determinant"};
 const MARK = {t:"transparent",s:"nova",f:"fals amic"};
@@ -1783,7 +2173,7 @@ const IC = {
 };
 
 /* ================= estat ================= */
-function blank(){ return {v:1, start:"2026-10-12", npd:14, inclT:false, cards:{}, known:{}, log:{}, texts:{}, ex:{}, name:"", theme:"auto", sound:true, tests:{}, vb:{}, lastBackup:0, onboard:false, xp:0, ach:{}, st:{}, frz:0, frzDay:0, frozen:{}, rd:{}, lx:{}}; }
+function blank(){ return {v:1, start:"2026-10-12", npd:14, inclT:false, cards:{}, known:{}, log:{}, texts:{}, ex:{}, name:"", theme:"auto", sound:true, tests:{}, vb:{}, lastBackup:0, onboard:false, xp:0, ach:{}, st:{}, frz:0, frzDay:0, frozen:{}, rd:{}, lx:{}, dg:{}, cd:{}, mock:[], err:{}, pc:{}, sc:{}, slv:false}; }
 function valid(o){ return o && typeof o === "object" && o.v === 1 && o.cards && typeof o.cards === "object"; }
 function load(){
   try { const o = JSON.parse(localStorage.getItem(KEY)); if (valid(o)) { const s = Object.assign(blank(), o); if (Object.keys(s.cards).length || Object.keys(s.log).length) s.onboard = true; return s; } } catch(e){}
@@ -1927,6 +2317,7 @@ function startSession(kind, o){
   else if (kind === "dictat") { title = "Dictat"; q = shuffle(pool(12)).slice(0, 12).map(id => ({t:"listen", id})); }
   else if (kind === "dificils") { title = "Paraules difícils"; hardIds().slice(0, 12).forEach(id => { q.push({t:"mcci", id}); q.push({t:recallType(id), id}); }); q = shuffle(q); }
   else if (kind === "test") { title = "Prova del bloc " + o.w; const ids = []; for (let i = (o.w - 1) * 200; i < o.w * 200; i++) if (D[i][2] !== "t") ids.push(i + 1); const pick = shuffle(ids).slice(0, 20); q = pick.map((id, i) => ({t: i < 10 ? "mcci" : recallType(id), id})); }
+  else if (EXTRA_KINDS[kind]) { const r = EXTRA_KINDS[kind](o); title = r.title; q = r.q; if (!q.length) return toast("Ara mateix no hi ha res per repassar aquí."); }
   else if (kind === "gramrev") { title = "Repàs de gramàtica"; q = gramQueue(); if (!q.length) return toast("Primer fes alguna lliçó del curs."); }
   else if (kind === "verbs") { title = "Verbs"; const vs = VERBS.map((v, i) => i).filter(i => o.group === "tots" || (o.group === "irr") === !!VERBS[i][2].pres); for (let i = 0; i < 12; i++) q.push({t:"verb", v:vs[rnd(vs.length)], tense:o.tenses[rnd(o.tenses.length)], p:rnd(6)}); }
   if (!q.length) return toast("Ara mateix no hi ha res per practicar aquí.");
@@ -1938,6 +2329,7 @@ function nextItem(){
   SES.fb = null;
   if (!SES.q.length) { SES.cur = null; return finishSession(); }
   const it = SES.cur = SES.q.shift();
+  if (DECK_T.has(it.t)) return prepDeck(it);
   if (it.t === "mcic" || it.t === "mcci") { it.opts = shuffle([it.id].concat(distract(it.id, 3))); it.pick = null; }
   if (it.t === "cloze") it.c = clozeOf(it.id);
   if (it.t === "build") { const t = buildOf(it.id); if (!t) { it.t = recallType(it.id); if (it.t === "cloze") it.c = clozeOf(it.id); } else { it.toks = t; const extra = []; for (let k = 0; k < 60 && extra.length < 3; k++){ const o = toks(1 + rnd(D.length)); const w = o[rnd(o.length)]; if (w && !t.some(x => x.toLowerCase() === w.toLowerCase()) && !extra.includes(w.toLowerCase())) extra.push(w.toLowerCase()); } it.bank = shuffle(t.concat(extra)); it.sel = []; } }
@@ -1947,14 +2339,16 @@ function nextItem(){
 function setFb(ok, title, detail){
   SES.fb = {ok, title, detail: detail || ""};
   const it = SES.cur;
-  if (it.t !== "intro" && it.t !== "match") { beep(ok); const l = L(); l.t++; if (ok) { l.c++; SES.ok++; SES.combo = (SES.combo || 0) + 1; SES.best = Math.max(SES.best || 0, SES.combo); addXP(2); } else { SES.ko++; SES.combo = 0; } }
+  logErr(it, ok);
+  if (it.t !== "intro" && it.t !== "match" && it.t !== "dintro") { beep(ok); const l = L(); l.t++; if (ok) { l.c++; SES.ok++; SES.combo = (SES.combo || 0) + 1; SES.best = Math.max(SES.best || 0, SES.combo); addXP(2); } else { SES.ko++; SES.combo = 0; } }
   if (it.t === "match") addXP(5);
   save(); render();
 }
 function requeue(it, extra){ const c = Object.assign({}, it, extra || {}); delete c.opts; delete c.pick; delete c.sel; delete c.bank; SES.q.splice(Math.min(3, SES.q.length), 0, c); }
 function advance(easy){
   const it = SES.cur, ok = SES.fb.ok, id = it.id;
-  if (SES.kind === "vocab" && it.nw && it.t !== "intro"){
+  if (DECK_T.has(it.t)) advanceDeck(it, ok, easy);
+  else if (SES.kind === "vocab" && it.nw && it.t !== "intro"){
     if (!ok) { SES.err[id] = 1; requeue(it); }
     else if (it.last) { S.cards[id] = nextCard(undefined, SES.err[id] ? 1 : 2); const l = L(); l.n++; l.r++; SES.learned++; }
   } else if (SES.kind === "vocab" && it.rev){
@@ -2008,6 +2402,7 @@ const sayBtn = (text, label) => '<button class="say" type="button" data-say="' +
 const accentRow = () => '<div class="accents">' + ["à","è","é","ì","ò","ù"].map(c => '<button type="button" data-acc="' + c + '" aria-label="Escriu ' + c + '">' + c + '</button>').join("") + '</div>';
 const answerBox = (ph) => '<input class="input answer" id="ans" data-autofocus lang="it" autocapitalize="off" autocomplete="off" autocorrect="off" spellcheck="false" placeholder="' + esc(ph || "Escriu en italià") + '"' + (SES.fb ? " disabled" : "") + ' value="' + esc(SES.cur.given || "") + '">' + (SES.fb ? "" : accentRow());
 function itemHtml(it){
+  if (DECK_T.has(it.t)) return deckHtml(it);
   if (it.t === "gx") return gxHtml(it);
   if (it.t === "verb"){
     const v = VERBS[it.v], tn = TENSES.find(t => t.k === it.tense);
@@ -2044,14 +2439,15 @@ function itemHtml(it){
 }
 function footHtml(it){
   if (SES.fb){
-    const f = SES.fb, neutral = it.t === "intro" || it.t === "match";
+    const f = SES.fb, neutral = it.t === "intro" || it.t === "match" || it.t === "dintro";
     if (neutral) return '<div class="s-foot"><div class="in"><button class="btn block" type="button" data-a="next" data-autofocus>Continua</button></div></div>';
-    const easy = f.ok && SES.kind === "vocab" && it.rev && !it.retry;
+    const easy = f.ok && (SES.kind === "vocab" || DECK_T.has(it.t)) && it.rev && !it.retry;
     return '<div class="s-foot ' + (f.ok ? "ok" : "bad") + '" role="status"><div class="in"><div class="verdict"><span class="mk">' + moka(f.ok ? "happy" : "sad", 52) + '</span><div class="stack" style="gap:4px"><b>' + esc(f.title) + (f.ok && SES.combo >= 5 && SES.combo % 5 === 0 ? ' <span class="combo">' + IC.flame + SES.combo + ' seguides!</span>' : "") + '</b>' + f.detail + '</div></div>' +
       '<div class="row">' + (easy ? '<button class="btn quiet" type="button" data-a="easy">Massa fàcil</button>' : "") + '<button class="btn block ' + (f.ok ? "ok" : "bad") + '" type="button" data-a="next" data-autofocus>Continua</button></div></div></div>';
   }
+  if (it.t === "dintro") return '<div class="s-foot"><div class="in"><button class="btn block" type="button" data-a="introOk" data-autofocus>Entesos</button></div></div>';
   if (it.t === "intro") return '<div class="s-foot"><div class="in"><div class="row"><button class="btn quiet" type="button" data-a="known">Ja la sé</button><button class="btn block" type="button" data-a="introOk" data-autofocus>Entesos</button></div></div></div>';
-  if (it.t === "mcic" || it.t === "mcci" || it.t === "match") return '<div class="s-foot"><div class="in"><p class="small muted">' + (it.t === "match" ? "Toca una paraula i després la seva traducció." : "Tria una resposta. Amb teclat, de l'1 al 4.") + '</p></div></div>';
+  if (it.t === "mcic" || it.t === "mcci" || it.t === "match" || it.t === "dmc" || it.t === "dmc2") return '<div class="s-foot"><div class="in"><p class="small muted">' + (it.t === "match" ? "Toca una paraula i després la seva traducció." : "Tria una resposta. Amb teclat, de l'1 al 4.") + '</p></div></div>';
   return '<div class="s-foot"><div class="in"><div class="row"><button class="btn quiet" type="button" data-a="skip">No ho sé</button><button class="btn block" type="button" data-a="check">Comprova</button></div></div></div>';
 }
 function sessionHtml(){
@@ -2061,7 +2457,7 @@ function sessionHtml(){
     const notes = (e.notes || []).map(n => '<div class="note' + (n.kind ? " " + n.kind : "") + '">' + (n.kind === "ice" ? IC.snow : n.kind === "lvl" ? IC.star : IC.trophy) + '<span>' + esc(n.msg) + '</span></div>').join("");
     return '<div class="session"><div class="s-top"></div><div class="s-body"><div class="s-in center finish">' + moka(good || !e.total ? "cele" : "think", 120) +
       '<div class="stack"><h1>' + (test ? (pass ? "Prova superada" : "Prova feta") : e.pct === 100 && e.total ? "Sessió perfecta" : "Sessió acabada") + '</h1><p class="muted">' + msg + '</p></div>' +
-      '<div class="stats">' + '<div class="stat xp"><b data-count="' + (e.xp || 0) + '">' + (e.xp || 0) + '</b><span>XP guanyats</span></div>' + (e.total ? '<div class="stat"><b data-count="' + e.pct + '" data-suf=" %">' + e.pct + ' %</b><span>encerts</span></div>' : "") + (test ? '<div class="stat"><b>' + SES.ok + " / " + e.total + '</b><span>respostes correctes</span></div>' : "") + (SES.learned ? '<div class="stat"><b>' + SES.learned + '</b><span>paraules noves</span></div>' : "") + (SES.best >= 5 ? '<div class="stat"><b>' + SES.best + '</b><span>seguides bé</span></div>' : "") + '<div class="stat"><b>' + e.mins + '</b><span>' + (e.mins === 1 ? "minut" : "minuts") + '</span></div></div>' +
+      '<div class="stats">' + '<div class="stat xp"><b data-count="' + (e.xp || 0) + '">' + (e.xp || 0) + '</b><span>XP guanyats</span></div>' + (e.total ? '<div class="stat"><b data-count="' + e.pct + '" data-suf=" %">' + e.pct + ' %</b><span>encerts</span></div>' : "") + (test ? '<div class="stat"><b>' + SES.ok + " / " + e.total + '</b><span>respostes correctes</span></div>' : "") + (SES.learned ? '<div class="stat"><b>' + SES.learned + '</b><span>' + (SES.kind === "phr" ? "frases noves" : SES.kind === "slang" ? "expressions noves" : "paraules noves") + '</span></div>' : "") + (SES.best >= 5 ? '<div class="stat"><b>' + SES.best + '</b><span>seguides bé</span></div>' : "") + '<div class="stat"><b>' + e.mins + '</b><span>' + (e.mins === 1 ? "minut" : "minuts") + '</span></div></div>' +
       (notes ? '<div class="notes">' + notes + '</div>' : "") +
       '</div></div><div class="s-foot"><div class="in"><button class="btn block" type="button" data-a="closeSes" data-autofocus>Continua</button></div></div></div>';
   }
@@ -2072,7 +2468,7 @@ function sessionHtml(){
 
 /* ================= vistes principals ================= */
 const TABS = [["inici","Avui",IC.home],["practica","Practica",IC.bolt],["curs","Curs",IC.book],["paraules","Paraules",IC.list],["progres","Progrés",IC.chart]];
-const tabOf = n => ({llico:"curs", escriure:"inici", verbs:"practica", lectures:"practica", lectura:"practica"}[n] || n);
+const tabOf = n => ({llico:"curs", escriure:"inici", verbs:"practica", lectures:"practica", lectura:"practica"}[n] || tabExtra[n] || n);
 function shell(name, body){
   const p = plan(), cur = tabOf(name);
   return '<div class="shell"><aside class="rail"><div class="logo">' + moka("idle", 30, "mini") + 'Italiano</div><nav class="nav" aria-label="Seccions">' +
@@ -2273,7 +2669,7 @@ function render(){
   checkAll();
   const key = r.name + "/" + r.arg; ENTER = key !== LASTR; LASTR = key;
   if (r.name === "sessio"){ if (SES) { app.innerHTML = sessionHtml(); afterRender(); const f = document.querySelector("[data-autofocus]"); if (f) { try { f.focus({preventScroll:true}); } catch(e){ f.focus(); } } return; } return go("inici"); }
-  const v = r.name === "inici" ? vHome() : r.name === "practica" ? vPractica() : r.name === "verbs" ? vVerbs() : r.name === "curs" ? vCurs() : r.name === "llico" ? vLesson(r.arg) : r.name === "escriure" ? vWrite() : r.name === "paraules" ? vWords() : r.name === "progres" ? vProgress() : r.name === "lectures" ? vReadings() : r.name === "lectura" ? vReading(r.arg) : vHome();
+  const v = r.name === "inici" ? vHome() : r.name === "practica" ? vPractica() : r.name === "verbs" ? vVerbs() : r.name === "curs" ? vCurs() : r.name === "llico" ? vLesson(r.arg) : r.name === "escriure" ? vWrite() : r.name === "paraules" ? vWords() : r.name === "progres" ? vProgress() : r.name === "lectures" ? vReadings() : r.name === "lectura" ? vReading(r.arg) : EXTRA_V[r.name] ? EXTRA_V[r.name](r.arg) : vHome();
   app.innerHTML = shell(r.name, v);
   if (ENTER) { const pg = app.querySelector(".page"); if (pg) pg.classList.add("enter"); }
   if (r.name === "escriure") countWords();
@@ -2296,6 +2692,7 @@ function checkLesson(id){
   const nl = v => normAns(String(v).replace(/[.,;:!?¿¡]/g, " "));
   l.ex.forEach((x, i) => { a[i] = $("ex" + i).value; const g = nl(a[i]); ok[i] = x[1].some(v => nl(v) === g) ? 1 : (g && x[1].some(v => strip(nl(v)) === strip(g)) ? 2 : 0); });
   S.ex[l.id] = {a, ok};
+  ok.forEach((v, i) => { if (a[i] && a[i].trim()) errMark("g:" + l.id + ":" + i, !!v); });
   const lx = S.lx[l.id] || (S.lx[l.id] = []); let gain = 0; ok.forEach((v, i) => { if (v && !lx[i]) { lx[i] = 1; gain += 2; } }); addXP(gain);
   const p = plan(); if (p.lesson && p.lesson.id === l.id && a.every(v => v.trim() !== "")) L().d[2] = 1;
   save(); render();
@@ -2333,8 +2730,10 @@ const ACT = {
   closeSes(){ const b = SES ? SES.back : "inici"; SES = null; go(b === "sessio" ? "inici" : b); },
   introOk(){ SES.fb = {ok:true}; advance(); },
   known(){ const id = SES.cur.id; S.known[id] = 1; SES.q = SES.q.filter(x => x.id !== id); SES.q.forEach(x => { if (x.t === "match") x.ids = x.ids.filter(y => y !== id); }); SES.q = SES.q.filter(x => x.t !== "match" || x.ids.length >= 3); SES.fb = {ok:true}; save(); SES.done++; nextItem(); render(); },
-  check(){ const it = SES.cur; if (it.t === "build") { if (!it.sel.length) return; const got = it.sel.map(b => it.bank[b]).join(" ").toLowerCase(), exp = it.toks.join(" ").toLowerCase(), ok = got === exp; return setFb(ok, ok ? "Correcte" : "No és correcte", '<p lang="it">' + esc(D[it.id - 1][4]) + '</p>'); } checkTyped(); },
-  skip(){ const it = SES.cur; if (it.t === "gx") { const x = LESSONS.find(l => l.id === it.lid).ex[it.i]; return setFb(false, "La resposta era", '<p><b style="display:inline;color:inherit" lang="it">' + esc(x[1][0]) + '</b></p>'); }
+  check(){ const it = SES.cur; if (it.t === "dbuild") { if (!it.sel.length) return; const got = it.sel.map(b => it.bank[b]).join(" ").toLowerCase(), exp = it.toks.join(" ").toLowerCase(), ok = got === exp; if (ok) speak(it.full); return setFb(ok, ok ? "Correcte" : "No és correcte", '<p lang="it">' + esc(it.full) + '</p>'); }
+    if (it.t === "build") { if (!it.sel.length) return; const got = it.sel.map(b => it.bank[b]).join(" ").toLowerCase(), exp = it.toks.join(" ").toLowerCase(), ok = got === exp; return setFb(ok, ok ? "Correcte" : "No és correcte", '<p lang="it">' + esc(D[it.id - 1][4]) + '</p>'); } checkTyped(); },
+  skip(){ const it = SES.cur; if (DECK_T.has(it.t)) { const x = dItem(it); return setFb(false, "La resposta era", '<p><b style="display:inline;color:inherit" lang="it">' + esc(x.it) + '</b>: ' + esc(x.ca) + '</p>'); }
+    if (it.t === "gx") { const x = LESSONS.find(l => l.id === it.lid).ex[it.i]; return setFb(false, "La resposta era", '<p><b style="display:inline;color:inherit" lang="it">' + esc(x[1][0]) + '</b></p>'); }
     if (it.t === "build") return setFb(false, "La resposta era", '<p lang="it">' + esc(D[it.id - 1][4]) + '</p>');
     if (it.t === "verb") { const v = VERBS[it.v], f = conj(v, it.tense); return setFb(false, "La resposta era", '<p><b style="display:inline;color:inherit">' + esc(f[it.p].split("|")[0]) + '</b></p>'); }
     const r = D[it.id - 1]; setFb(false, "La resposta era", '<p><b style="display:inline;color:inherit">' + esc(it.t === "cloze" ? it.c.ans : r[0]) + '</b></p><p class="small muted">' + esc(r[4]) + '</p>'); },
@@ -2356,6 +2755,7 @@ document.addEventListener("click", e => {
   if ((el = t.closest("[data-say]"))) return speak(el.dataset.say);
   if ((el = t.closest("[data-a]"))) { const f = ACT[el.dataset.a]; if (f) f(el); return; }
   if ((el = t.closest("[data-go]"))) { closeSheet(); return go(el.dataset.go); }
+  if ((el = t.closest("[data-opt]")) && SES && !SES.fb && DECK_T.has(SES.cur.t)) return deckPick(+el.dataset.opt);
   if ((el = t.closest("[data-opt]")) && SES && !SES.fb) { const it = SES.cur, i = +el.dataset.opt; it.pick = i; const ok = it.opts[i] === it.id, r = D[it.id - 1]; return setFb(ok, ok ? "Correcte" : "No és correcte", '<p><span lang="it" style="font-weight:700">' + esc(r[0]) + '</span>: ' + esc(r[3]) + '</p>'); }
   if ((el = t.closest("[data-tile]")) && SES && !SES.fb) { SES.cur.sel.push(+el.dataset.tile); return render(); }
   if ((el = t.closest("[data-un]")) && SES && !SES.fb) { SES.cur.sel.splice(+el.dataset.un, 1); return render(); }
@@ -2393,8 +2793,8 @@ document.addEventListener("keydown", e => {
   if (!SES || route().name !== "sessio") { if (e.key === "Enter" && e.target.id && /^ex\d+$/.test(e.target.id)) { e.preventDefault(); const n = $("ex" + (+e.target.id.slice(2) + 1)); if (n) n.focus(); else checkLesson(route().arg); } return; }
   if (SES.end) { if (e.key === "Enter") { e.preventDefault(); ACT.closeSes(); } return; }
   const it = SES.cur;
-  if (e.key === "Enter") { e.preventDefault(); if (SES.fb) return advance(false); if (it.t === "intro") return ACT.introOk(); if (it.t === "mcic" || it.t === "mcci" || it.t === "match") return; return ACT.check(); }
-  if (!SES.fb && (it.t === "mcic" || it.t === "mcci") && e.key >= "1" && e.key <= "4") { const b = document.querySelector('[data-opt="' + (+e.key - 1) + '"]'); if (b) { e.preventDefault(); b.click(); } }
+  if (e.key === "Enter") { e.preventDefault(); if (SES.fb) return advance(false); if (it.t === "intro" || it.t === "dintro") return ACT.introOk(); if (it.t === "mcic" || it.t === "mcci" || it.t === "match" || it.t === "dmc" || it.t === "dmc2") return; return ACT.check(); }
+  if (!SES.fb && (it.t === "mcic" || it.t === "mcci" || it.t === "dmc" || it.t === "dmc2") && e.key >= "1" && e.key <= "4") { const b = document.querySelector('[data-opt="' + (+e.key - 1) + '"]'); if (b) { e.preventDefault(); b.click(); } }
 });
 document.addEventListener("mouseover", e => { const el = e.target.closest && e.target.closest("[data-tip]"); showTip(el); });
 document.addEventListener("focusin", e => { const el = e.target.closest && e.target.closest("[data-tip]"); showTip(el); });
@@ -2782,6 +3182,446 @@ document.addEventListener("click", e => {
   if (pn) { CV.sel = CV.sel === pn.dataset.pn ? null : pn.dataset.pn; render(); return; }
   if (CV.sel && route().name === "curs" && !(t.closest && t.closest(".pbub"))) { CV.sel = null; render(); }
 });
+
+/* ================= escoltar, parlar, frases útils, slang, errors i nivell A2 ================= */
+Object.assign(IC, {
+  chat: svg('<path d="M4 5h16v10H9l-5 4z"/>'),
+  mic: svg('<rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/>'),
+  quote: svg('<path d="M7 7h4v4c0 3-1.5 5-4 6M14 7h4v4c0 3-1.5 5-4 6"/>'),
+  fire: svg('<path d="M12 3c2 4 6 5 6 10a6 6 0 0 1-12 0c0-3 2-4 2-7 2 1 3 3 3 5 1-2 1-5 1-8z"/>'),
+  note: svg('<path d="M6 3h9l4 4v14H6z"/><path d="M14 3v5h5M9 13h7M9 17h5"/>'),
+  flag: svg('<path d="M5 21V4M5 4h11l-2 4 2 4H5"/>'),
+  play: svg('<path d="M8 5v14l11-7z"/>', "fill"),
+  stop: svg('<rect x="7" y="7" width="10" height="10" rx="2"/>', "fill"),
+  turtle: svg('<path d="M4 15c0-4 3.5-7 8-7s8 3 8 7z"/><path d="M20 15h2M6 15l-1 3M18 15l1 3M9 8l1-3"/>'),
+  eye: svg('<path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/>')
+});
+const tabExtra = {dialegs:"practica", dialeg:"practica", parla:"practica", frasi:"practica", slang:"practica", errors:"practica", a2:"progres", examen:"progres"};
+
+/* ---------- veu: diverses línies seguides, amb dues veus ---------- */
+let PLAYTOK = 0;
+const _speak = speak;
+speak = function(text, rate){ PLAYTOK++; _speak(text, rate); };
+function voiceFor(who){
+  if (!voice) return null;
+  if (!(who % 2)) return {v:voice, pitch:1};
+  const alt = VOICES.find(v => v.voiceURI !== voice.voiceURI && vQual(v) >= vQual(voice));
+  return alt ? {v:alt, pitch:1} : {v:voice, pitch:0.8};
+}
+function playLines(lines, o){
+  o = o || {}; if (!voice) { toast("Aquest dispositiu no té veu italiana. Descarrega'n una a Configuració › Accessibilitat › Contingut llegit."); return; }
+  const tok = ++PLAYTOK;
+  try { speechSynthesis.cancel(); } catch(e){}
+  let i = 0;
+  const next = () => {
+    if (tok !== PLAYTOK) return;
+    if (i >= lines.length) { if (o.done) o.done(); return; }
+    const k = i++, ln = lines[k], vf = voiceFor(ln[0]);
+    if (o.line) o.line(k);
+    try {
+      const u = new SpeechSynthesisUtterance(ln[1]); u.voice = vf.v; u.lang = vf.v.lang; u.pitch = vf.pitch; u.rate = 0.92 * (o.rate || 1) * (S.rate || 1);
+      u.onend = () => setTimeout(next, 350); u.onerror = () => setTimeout(next, 100);
+      speechSynthesis.speak(u);
+    } catch(e){ next(); }
+  };
+  next();
+}
+function stopLines(){ PLAYTOK++; try { speechSynthesis.cancel(); } catch(e){} }
+
+/* ---------- diàlegs ---------- */
+let DG = {id:null};
+function dgInit(id){ const d = DIALOGS.find(x => x.id === id); DG = {id, show:false, tr:false, cur:-1, slow:false, playing:false, ord: d.q.map(q => shuffle(q[1].map((x, i) => i))), ans: d.q.map(() => null)}; }
+function vDialogs(){
+  const p = plan(), cw = p.pre ? 1 : Math.min(11, p.week);
+  return '<div class="row"><button class="iconbtn" type="button" data-go="practica" aria-label="Torna a Practica">' + IC.back + '</button><h1>Diàlegs</h1></div>' +
+    '<p class="muted">Converses de situacions reals. Escolta-les primer sense mirar el text, respon les preguntes i després llegeix-les i repeteix-les.</p>' +
+    '<div class="list">' + DIALOGS.map(d => { const r = S.dg[d.id];
+      return '<button type="button" class="item' + (d.w > cw ? " later" : "") + '" data-go="dialeg/' + d.id + '"><span class="dot' + (r ? " done" : "") + '">' + IC.check + '</span><span class="grow"><span class="t" lang="it">' + esc(d.t) + '</span>' + (d.inf ? ' <span class="badge warn">informal</span>' : "") + '<br><span class="s">' + esc(d.s) + ' · setmana ' + d.w + '</span></span>' + (r ? '<span class="badge ok">' + r.ok + " / " + r.total + '</span>' : "") + IC.chev + '</button>'; }).join("") + '</div>';
+}
+function vDialog(id){
+  const d = DIALOGS.find(x => x.id === id); if (!d) return vDialogs();
+  if (DG.id !== id) dgInit(id);
+  const ita = d.w >= 6, done = DG.ans.every(a => a !== null), okN = DG.ans.filter(a => a === 0).length;
+  const lines = d.l.map((ln, i) => '<button type="button" class="dl s' + ln[0] + (DG.cur === i ? " on" : "") + '" data-dl="' + i + '"><span class="who">' + esc(d.p[ln[0]]) + '</span><span class="it' + (DG.show ? "" : " blur") + '" lang="it">' + esc(ln[1]) + '</span>' + (DG.tr ? '<span class="ca">' + esc(ln[2]) + '</span>' : "") + '</button>').join("");
+  const qs = d.q.map((q, qi) => { const a = DG.ans[qi];
+    return '<div class="stack"><p style="font-weight:600"' + (ita ? ' lang="it"' : "") + '>' + (qi + 1) + ". " + esc(q[0]) + '</p><div class="opts">' + DG.ord[qi].map(oi => { let c = ""; if (a !== null) c = oi === 0 ? " right" : oi === a ? " wrong" : " dim";
+      return '<button type="button" class="opt' + c + '" data-dq="' + qi + '" data-do="' + oi + '"' + (a !== null ? " disabled" : "") + (ita ? ' lang="it"' : "") + '>' + esc(q[1][oi]) + '</button>'; }).join("") + '</div></div>'; }).join("");
+  return '<div class="row"><button class="iconbtn" type="button" data-go="dialegs" aria-label="Torna a Diàlegs">' + IC.back + '</button><h1 lang="it">' + esc(d.t) + '</h1></div>' +
+    '<p class="muted">' + esc(d.s) + '.' + (d.inf ? " Diàleg informal: surt slang de veritat." : "") + '</p>' +
+    '<div class="card"><div class="row wrap"><button class="btn" type="button" data-a="dgPlay">' + (DG.playing ? IC.stop + "Atura" : IC.play + "Escolta el diàleg") + '</button>' +
+      '<button type="button" class="toggle" data-a="dgSlow" aria-pressed="' + DG.slow + '">' + IC.turtle + 'A poc a poc</button>' +
+      '<button type="button" class="toggle" data-a="dgShow" aria-pressed="' + DG.show + '">' + IC.eye + 'Text</button>' +
+      '<button type="button" class="toggle" data-a="dgTr" aria-pressed="' + DG.tr + '">Traducció</button></div>' +
+      (voice ? "" : '<p class="small" style="color:var(--bad)">Aquest dispositiu no té veu italiana: descarrega\'n una a Configuració › Accessibilitat › Contingut llegit.</p>') +
+      '<div class="dlines">' + lines + '</div><p class="small muted">' + (DG.show ? "Toca una frase per tornar-la a escoltar." : "Primer escolta'l sense text. Després toca «Text» per llegir-lo.") + '</p></div>' +
+    '<div class="card"><h2>Preguntes</h2>' + qs + (done ? '<div class="row between wrap"><b class="num" style="font-size:1.2rem">' + okN + " de " + d.q.length + '</b><div class="row wrap"><button class="btn quiet" type="button" data-a="dgAgain">Torna-hi</button><button class="btn soft" type="button" data-go="parla/d:' + d.id + '">' + IC.mic + 'Practica\'l parlant</button></div></div>' : "") + '</div>';
+}
+function answerDialog(qi, oi){
+  const d = DIALOGS.find(x => x.id === DG.id); if (!d || DG.ans[qi] !== null) return;
+  DG.ans[qi] = oi; beep(oi === 0);
+  if (DG.ans.every(a => a !== null)) {
+    const ok = DG.ans.filter(a => a === 0).length, first = !S.dg[d.id];
+    if (first || ok > S.dg[d.id].ok) S.dg[d.id] = {ok, total:d.q.length, day:T()};
+    if (first) { addXP(ok * 3 + 5); notify("Diàleg acabat: +" + (ok * 3 + 5) + " XP", "lvl"); }
+    save();
+  }
+  render();
+}
+function dgMark(i){ document.querySelectorAll(".dl").forEach((el, k) => el.classList.toggle("on", k === i)); DG.cur = i; }
+
+/* ---------- parla (shadowing) ---------- */
+const SRec = window.SpeechRecognition || window.webkitSpeechRecognition || null;
+let PR = {src:"f0", i:0, rec:null, recOn:false, srOn:false, sr:null};
+function prItems(src){
+  if (src.startsWith("d:")) { const d = DIALOGS.find(x => x.id === src.slice(2)); return d ? d.l.map(l => ({it:l[1], ca:l[2], who:l[0]})) : []; }
+  const c = +src.slice(1); return FRASI.filter(f => f[0] === c).map(f => ({it:f[1], ca:f[2], who:0}));
+}
+function vParla(arg){
+  if (arg && arg !== PR.src && (arg.startsWith("d:") || /^f\d+$/.test(arg))) { PR = {src:arg, i:0, rec:null, recOn:false, srOn:false, sr:null}; }
+  const items = prItems(PR.src); if (!items.length) { PR.src = "f0"; return vParla(); }
+  PR.i = Math.max(0, Math.min(items.length - 1, PR.i));
+  const it = items[PR.i], canRec = !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia && window.MediaRecorder);
+  const opts = '<optgroup label="Frases útils">' + FRASI_CAT.map((c, i) => '<option value="f' + i + '"' + (PR.src === "f" + i ? " selected" : "") + '>' + esc(c) + '</option>').join("") + '</optgroup><optgroup label="Diàlegs">' + DIALOGS.map(d => '<option value="d:' + d.id + '"' + (PR.src === "d:" + d.id ? " selected" : "") + '>' + esc(d.t) + '</option>').join("") + '</optgroup>';
+  const sr = PR.sr;
+  return '<div class="row"><button class="iconbtn" type="button" data-go="practica" aria-label="Torna a Practica">' + IC.back + '</button><h1>Parla</h1></div>' +
+    '<p class="muted">Escolta la frase, repeteix-la en veu alta imitant l\'entonació i grava\'t. Després compara la teva veu amb l\'original.</p>' +
+    '<select id="prsrc" class="input" aria-label="Què vols practicar">' + opts + '</select>' +
+    '<div class="card shadow"><div class="row between"><span class="badge">' + (PR.i + 1) + " / " + items.length + '</span>' + (sr ? '<span class="badge ' + (sr.pct >= 80 ? "ok" : sr.pct >= 50 ? "warn" : "") + '">' + sr.pct + ' %</span>' : "") + '</div>' +
+      '<p class="shtxt" lang="it">' + (sr ? sr.words.map(w => '<span class="' + (w[1] ? "hit" : "miss") + '">' + esc(w[0]) + '</span>').join(" ") : esc(it.it)) + '</p><p class="muted">' + esc(it.ca) + '</p>' +
+      (sr ? '<p class="small muted">He entès: «' + esc(sr.heard) + '»</p>' : "") +
+      '<div class="row wrap"><button class="btn soft" type="button" data-a="prSay">' + IC.sound + 'Escolta</button><button class="btn quiet" type="button" data-a="prSlow">' + IC.turtle + 'Lenta</button></div>' +
+      '<div class="recrow">' + (canRec ? '<button type="button" class="recbtn' + (PR.recOn ? " on" : "") + '" data-a="prRec" aria-label="' + (PR.recOn ? "Atura la gravació" : "Grava't") + '">' + (PR.recOn ? IC.stop : IC.mic) + '</button><span class="small muted">' + (PR.recOn ? "Gravant… toca per aturar" : PR.rec ? "Gravat. Escolta't i compara." : "Toca per gravar-te") + '</span>' : '<span class="small muted">Aquest navegador no deixa gravar àudio.</span>') + '</div>' +
+      (PR.rec && !PR.recOn ? '<div class="row wrap"><button class="btn" type="button" data-a="prPlay">' + IC.play + 'Escolta\'t</button><button class="btn quiet" type="button" data-a="prSay">' + IC.sound + 'Original</button></div>' : "") +
+      (SRec ? '<div><button class="btn quiet" type="button" data-a="prSR"' + (PR.srOn ? " disabled" : "") + '>' + IC.chat + (PR.srOn ? "T'escolto…" : "Digues-ho i et corregeixo") + '</button></div>' : "") +
+      '<div class="row between"><button class="btn quiet" type="button" data-a="prPrev"' + (PR.i ? "" : " disabled") + '>Anterior</button><button class="btn" type="button" data-a="prNext"' + (PR.i < items.length - 1 ? "" : " disabled") + '>Següent</button></div></div>' +
+    '<p class="small muted">La primera vegada l\'iPad et demanarà permís per fer servir el micròfon. Les gravacions no es desen enlloc: desapareixen quan passes a la frase següent.' + (SRec ? " La correcció automàtica fa servir el reconeixement de veu del dispositiu i pot necessitar internet." : "") + '</p>';
+}
+let MREC = null, MSTREAM = null, MCH = [], MTIMER = null;
+async function recToggle(){
+  if (PR.recOn) { try { MREC.stop(); } catch(e){} return; }
+  try { MSTREAM = await navigator.mediaDevices.getUserMedia({audio:true}); } catch(e){ toast("No puc fer servir el micròfon. Dona-li permís a Configuració › Safari › Micròfon."); return; }
+  MCH = []; try { MREC = new MediaRecorder(MSTREAM); } catch(e){ toast("Aquest navegador no deixa gravar àudio."); return; }
+  MREC.ondataavailable = e => { if (e.data && e.data.size) MCH.push(e.data); };
+  MREC.onstop = () => {
+    clearTimeout(MTIMER); try { MSTREAM.getTracks().forEach(t => t.stop()); } catch(e){}
+    if (PR.rec) URL.revokeObjectURL(PR.rec);
+    PR.rec = MCH.length ? URL.createObjectURL(new Blob(MCH, {type: MREC.mimeType || "audio/mp4"})) : null; PR.recOn = false;
+    const l = L(); S.st.sh = (S.st.sh || 0) + 1; l.sh = (l.sh || 0) + 1; if (l.sh <= 20) addXP(2); save();
+    if (route().name === "parla") render();
+  };
+  MREC.start(); PR.recOn = true; render();
+  MTIMER = setTimeout(() => { if (PR.recOn) try { MREC.stop(); } catch(e){} }, 15000);
+}
+const NUMW = "zero uno due tre quattro cinque sei sette otto nove dieci undici dodici tredici quattordici quindici sedici diciassette diciotto diciannove venti".split(" ");
+const normW = s => strip(String(s).toLowerCase().replace(/\b(\d{1,2})\b/g, (m, n) => NUMW[+n] || m)).replace(/[^a-z0-9' ]+/g, " ").replace(/'/g, "' ").split(/\s+/).filter(Boolean);
+function scoreSpeech(target, alts){
+  const tw = target.split(/\s+/).filter(Boolean);
+  let best = null;
+  alts.forEach(a => {
+    const bag = normW(a), used = new Array(bag.length).fill(false);
+    const words = tw.map(w => { const n = normW(w).join(" "); if (!n) return [w, true]; const k = bag.findIndex((b, i) => !used[i] && (b === n || n.split(" ").includes(b))); if (k >= 0) { used[k] = true; return [w, true]; } return [w, false]; });
+    const pct = Math.round(words.filter(w => w[1]).length / Math.max(1, words.length) * 100);
+    if (!best || pct > best.pct) best = {heard:a, words, pct};
+  });
+  return best;
+}
+function srStart(){
+  if (!SRec || PR.srOn) return;
+  const items = prItems(PR.src), target = items[PR.i].it;
+  let r; try { r = new SRec(); } catch(e){ toast("El reconeixement de veu no està disponible."); return; }
+  r.lang = "it-IT"; r.interimResults = false; r.maxAlternatives = 3;
+  r.onresult = e => { const alts = []; for (let i = 0; i < e.results[0].length; i++) alts.push(e.results[0][i].transcript); PR.sr = scoreSpeech(target, alts); if (PR.sr.pct >= 80) beep(true); };
+  r.onerror = e => { toast(e.error === "not-allowed" || e.error === "service-not-allowed" ? "Cal donar permís al micròfon i al reconeixement de veu." : e.error === "network" ? "La correcció automàtica necessita internet." : "No t'he sentit bé. Torna-ho a provar."); };
+  r.onend = () => { PR.srOn = false; if (route().name === "parla") render(); };
+  try { r.start(); PR.srOn = true; render(); } catch(e){ PR.srOn = false; return; }
+  setTimeout(() => { if (PR.srOn) { try { r.abort(); } catch(e){} PR.srOn = false; if (route().name === "parla") render(); } }, 9000);
+}
+function prMove(d){ const n = prItems(PR.src).length; PR.i = Math.max(0, Math.min(n - 1, PR.i + d)); if (PR.rec) URL.revokeObjectURL(PR.rec); PR.rec = null; PR.sr = null; render(); }
+
+/* ---------- baralles: frases útils i slang, amb repàs espaiat ---------- */
+const DECKS = {
+  phr: {store:"pc", items: FRASI.map(x => ({it:x[1], ca:x[2], cat:x[0]}))},
+  slang: {store:"sc", items: SLANG.map(x => ({it:x[0], ca:x[1], tag:x[2], ex:x[3], exca:x[4]}))}
+};
+const DECK_T = new Set(["dintro", "dmc", "dmc2", "dbuild"]);
+const dStore = k => S[DECKS[k].store] || (S[DECKS[k].store] = {});
+const dItem = it => DECKS[it.deck].items[it.i];
+const dAllowed = (k, i) => k !== "slang" || S.slv || DECKS.slang.items[i].tag !== "v";
+const dDue = k => { const st = dStore(k), t = T(); return Object.keys(st).filter(i => st[i][0] <= t).map(Number); };
+const dFresh = (k, n) => { const st = dStore(k), out = []; DECKS[k].items.forEach((x, i) => { if (out.length < n && !st[i] && dAllowed(k, i)) out.push(i); }); return out; };
+const dWords = s => s.split(/\s+/).map(cleanTok).filter(Boolean);
+function deckQueue(k, nNew){
+  const q = dDue(k).map(i => ({t: Math.random() < 0.5 ? "dmc" : "dmc2", deck:k, i, rev:true})), nw = dFresh(k, nNew);
+  nw.forEach(i => q.push({t:"dintro", deck:k, i, nw:true}));
+  shuffle(nw).forEach(i => q.push({t:"dmc2", deck:k, i, nw:true}));
+  shuffle(nw).forEach(i => { const w = dWords(DECKS[k].items[i].it); q.push({t: k === "phr" && w.length >= 3 && w.length <= 8 ? "dbuild" : "dmc", deck:k, i, nw:true, last:true}); });
+  return q;
+}
+function prepDeck(it){
+  const items = DECKS[it.deck].items, x = items[it.i];
+  if (it.t === "dmc" || it.t === "dmc2") {
+    const key = it.t === "dmc" ? "it" : "ca", seen = new Set([x[key]]), pool = [];
+    const same = items.map((y, j) => j).filter(j => j !== it.i && (it.deck === "phr" ? items[j].cat === x.cat : items[j].tag === x.tag));
+    const rest = items.map((y, j) => j).filter(j => j !== it.i);
+    for (const j of shuffle(same).concat(shuffle(rest))) { if (pool.length >= 3) break; if (!seen.has(items[j][key]) && dAllowed(it.deck, j)) { seen.add(items[j][key]); pool.push(j); } }
+    it.opts = shuffle([it.i].concat(pool)); it.pick = null;
+  }
+  if (it.t === "dbuild") {
+    const t = dWords(x.it), extra = [];
+    for (let k = 0; k < 60 && extra.length < 2; k++) { const o = dWords(items[rnd(items.length)].it); const w = o[rnd(o.length)]; if (w && !t.some(y => y.toLowerCase() === w.toLowerCase()) && !extra.includes(w.toLowerCase())) extra.push(w.toLowerCase()); }
+    it.toks = t; it.full = x.it; it.bank = shuffle(t.concat(extra)); it.sel = [];
+  }
+}
+function deckHtml(it){
+  const x = dItem(it), sl = it.deck === "slang", tag = sl ? SLANG_TAG[x.tag] : null;
+  if (it.t === "dintro") return '<p class="prompt">' + (sl ? "Expressió nova" : "Frase nova") + '</p><div class="card"><div class="row between wrap"><span class="row wrap"><span class="badge' + (sl && x.tag === "v" ? " bad" : sl ? " warn" : "") + '">' + esc(sl ? tag[0] : FRASI_CAT[x.cat]) + '</span></span>' + sayBtn(x.it + (sl ? ". " + x.ex : "")) + '</div>' +
+    '<div class="bigword" lang="it" style="font-size:clamp(1.6rem,6vw,2.3rem)">' + esc(x.it) + '</div><p style="font-size:1.15rem;font-weight:600">' + esc(x.ca) + '</p>' +
+    (sl ? '<div class="stack"><p class="sent" lang="it">' + esc(x.ex) + '</p><p class="muted">' + esc(x.exca) + '</p><p class="small muted">' + esc(tag[1]) + '</p></div>' : "") + '</div>';
+  if (it.t === "dmc" || it.t === "dmc2") {
+    const toIt = it.t === "dmc", items = DECKS[it.deck].items;
+    return '<p class="prompt">' + (toIt ? "Com es diu en italià?" : "Què vol dir?") + '</p><div class="row between"><div class="q md"' + (toIt ? "" : ' lang="it"') + '>' + esc(toIt ? x.ca : x.it) + '</div>' + (toIt ? "" : sayBtn(x.it, "")) + '</div>' +
+      '<div class="opts">' + it.opts.map((o, i) => { let c = ""; if (SES.fb) c = o === it.i ? " right" : it.pick === i ? " wrong" : " dim";
+        return '<button type="button" class="opt' + c + '" data-opt="' + i + '"' + (SES.fb ? " disabled" : "") + (toIt ? ' lang="it"' : "") + '><kbd>' + (i + 1) + '</kbd>' + esc(toIt ? items[o].it : items[o].ca) + '</button>'; }).join("") + '</div>';
+  }
+  if (it.t === "dbuild") {
+    const used = new Set(it.sel);
+    return '<p class="prompt">Construeix la frase en italià</p><div class="q md">' + esc(x.ca) + '</div>' +
+      '<div class="built" lang="it">' + it.sel.map((b, k) => '<button type="button" class="tile" data-un="' + k + '"' + (SES.fb ? " disabled" : "") + '>' + esc(it.bank[b]) + '</button>').join("") + '</div>' +
+      '<div class="bank" lang="it">' + it.bank.map((w, b) => '<button type="button" class="tile' + (used.has(b) ? " used" : "") + '" data-tile="' + b + '"' + (SES.fb ? " disabled" : "") + '>' + esc(w) + '</button>').join("") + '</div>';
+  }
+  return "";
+}
+function deckPick(i){
+  const it = SES.cur; it.pick = i; const ok = it.opts[i] === it.i, x = dItem(it);
+  if (ok) speak(x.it);
+  setFb(ok, ok ? "Correcte" : "No és correcte", '<p><span lang="it" style="font-weight:700">' + esc(x.it) + '</span>: ' + esc(x.ca) + '</p>');
+}
+function advanceDeck(it, ok, easy){
+  const st = dStore(it.deck), key = it.deck + it.i;
+  if (it.t === "dintro") return;
+  if (it.nw) { if (!ok) { SES.err[key] = 1; requeue(it); } else if (it.last) { st[it.i] = nextCard(undefined, SES.err[key] ? 1 : 2); SES.learned++; } }
+  else if (it.rev) { if (!it.retry) st[it.i] = nextCard(st[it.i], ok ? (easy ? 3 : 2) : 0); if (!ok) requeue({t:"dmc", deck:it.deck, i:it.i, rev:true, retry:true}); }
+  else if (!ok && !it.again) requeue(it, {again:true});
+}
+
+/* ---------- vistes de frases útils i slang ---------- */
+let FU = {cat:-1};
+function vFrasi(){
+  const st = dStore("phr"), due = dDue("phr").length, fresh = dFresh("phr", 999).length, learned = Object.keys(st).length;
+  const rows = FRASI.map((f, i) => [f, i]).filter(x => FU.cat < 0 || x[0][0] === FU.cat);
+  return '<div class="row"><button class="iconbtn" type="button" data-go="practica" aria-label="Torna a Practica">' + IC.back + '</button><h1>Frases útils</h1></div>' +
+    '<p class="muted">' + FRASI.length + ' frases fetes per sortir-te\'n al bar, a l\'estació, a l\'hotel o quan no entens res. Tenen el seu propi repàs, separat de les 2.000 paraules.</p>' +
+    '<div class="card"><div class="row between wrap"><div class="stack" style="gap:2px"><b class="num" style="font-size:1.3rem">' + learned + " de " + FRASI.length + '</b><span class="small muted">frases apreses' + (due ? " · " + pl(due, "repàs pendent", "repassos pendents") : "") + '</span></div>' +
+      '<button class="btn" type="button" data-a="phrLearn"' + (due + fresh ? "" : " disabled") + '>' + (due ? "Repassa i aprèn-ne més" : "Aprèn-ne 5") + '</button></div><div class="prog lv"><span>Progrés</span><span class="tr"><i style="width:' + Math.round(learned / FRASI.length * 100) + '%"></i></span><span>' + Math.round(learned / FRASI.length * 100) + ' %</span></div></div>' +
+    '<div class="chips"><button type="button" class="chip" data-fucat="-1" aria-pressed="' + (FU.cat < 0) + '">Totes</button>' + FRASI_CAT.map((c, i) => '<button type="button" class="chip" data-fucat="' + i + '" aria-pressed="' + (FU.cat === i) + '">' + esc(c) + '</button>').join("") + '</div>' +
+    '<div class="list">' + rows.map(([f, i]) => '<button type="button" class="wrow" data-say="' + esc(f[1]) + '"><span class="w" lang="it" style="max-width:55%">' + esc(f[1]) + '</span><span class="g">' + esc(f[2]) + '</span><span class="st' + (st[i] ? " rev" : "") + '"></span></button>').join("") + '</div>' +
+    '<div><button class="btn soft" type="button" data-go="parla/f' + Math.max(0, FU.cat) + '">' + IC.mic + 'Practica-les parlant</button></div>';
+}
+let SL = {tag:""};
+function vSlang(){
+  const p = plan(), early = p.pre || p.week < 3, st = dStore("slang"), due = dDue("slang").length, fresh = dFresh("slang", 999).length;
+  const rows = SLANG.map((x, i) => [x, i]).filter(r => (!SL.tag || r[0][2] === SL.tag) && (S.slv || r[0][2] !== "v" || SL.tag === "v"));
+  return '<div class="row"><button class="iconbtn" type="button" data-go="practica" aria-label="Torna a Practica">' + IC.back + '</button><h1>Slang</h1></div>' +
+    '<p class="muted">L\'italià del carrer, de la trap, del futbol i dels joves. Serveix per entendre la música i els vídeos. A l\'examen A2 no hi surt.</p>' +
+    (early ? '<div class="banner"><span>Et recomano obrir aquest apartat a partir de la setmana 3, quan ja tinguis una mica de base. Però pots fer-hi un cop d\'ull.</span></div>' : "") +
+    '<div class="card"><div class="row between wrap"><div class="stack" style="gap:2px"><b class="num" style="font-size:1.3rem">' + Object.keys(st).length + " de " + SLANG.length + '</b><span class="small muted">expressions al repàs' + (due ? " · " + pl(due, "pendent", "pendents") : "") + '</span></div>' +
+      '<button class="btn" type="button" data-a="slangLearn"' + (due + fresh ? "" : " disabled") + '>' + (due ? "Repassa i aprèn-ne més" : "Aprèn-ne 5") + '</button></div>' +
+      '<label class="switch" for="setSlv" style="padding-inline:0"><span class="small">Inclou les expressions vulgars al repàs</span><input type="checkbox" id="setSlv"' + (S.slv ? " checked" : "") + '></label>' +
+      '<p class="small muted">L\'slang canvia de pressa, sobretot el de la trap. Les expressions d\'aquí són les més esteses fins al 2026.</p></div>' +
+    '<div class="chips"><button type="button" class="chip" data-sltag="" aria-pressed="' + (!SL.tag) + '">Totes</button>' + Object.keys(SLANG_TAG).map(k => '<button type="button" class="chip" data-sltag="' + k + '" aria-pressed="' + (SL.tag === k) + '">' + SLANG_TAG[k][0] + '</button>').join("") + '</div>' +
+    (SL.tag ? '<p class="small muted">' + esc(SLANG_TAG[SL.tag][1]) + '</p>' : "") +
+    '<div class="slist">' + rows.map(([x, i]) => '<div class="sl"><div class="row between"><b lang="it">' + esc(x[0]) + '</b><span class="badge' + (x[2] === "v" ? " bad" : "") + '">' + SLANG_TAG[x[2]][0] + '</span></div><span class="m">' + esc(x[1]) + '</span><button type="button" class="ex" data-say="' + esc(x[3]) + '"><span lang="it">' + esc(x[3]) + '</span><span class="muted">' + esc(x[4]) + '</span></button>' + (st[i] ? '<span class="small" style="color:var(--ok);font-weight:700">Al repàs</span>' : "") + '</div>').join("") + '</div>';
+}
+
+/* ---------- quadern d'errors ---------- */
+function logErr(it, ok){
+  if (!it || it.nw || it.t === "intro" || it.t === "match" || it.t === "dintro") return;
+  let key = null;
+  if (DECK_T.has(it.t)) key = "d:" + it.deck + ":" + it.i;
+  else if (it.t === "verb") key = "v:" + it.v + ":" + it.tense + ":" + it.p;
+  else if (it.t === "gx") key = "g:" + it.lid + ":" + it.i;
+  else if (it.id) key = "w:" + it.id;
+  if (!key) return;
+  errMark(key, ok);
+}
+function errMark(key, ok){
+  const E = S.err || (S.err = {}), e = E[key];
+  if (!ok) E[key] = {n: (e ? e.n : 0) + 1, d: T()};
+  else if (e && !e.f) e.f = T();
+}
+function errInfo(key){
+  const p = key.split(":");
+  if (p[0] === "w") { const r = D[+p[1] - 1]; return r && {k:"Paraules", a:r[0], b:r[3], it:1}; }
+  if (p[0] === "v") { const v = VERBS[+p[1]], tn = TENSES.find(t => t.k === p[2]); return v && tn && {k:"Verbs", a:PERS[+p[3]] + " · " + v[0] + " (" + tn.n.toLowerCase() + ")", b:conj(v, p[2])[+p[3]].split("|")[0], it:1}; }
+  if (p[0] === "g") { const l = LESSONS.find(x => x.id === p[1]), x = l && l.ex[+p[2]]; return x && {k:"Gramàtica", a:x[0], b:x[1][0], it:1}; }
+  if (p[0] === "d") { const d = DECKS[p[1]], x = d && d.items[+p[2]]; return x && {k: p[1] === "phr" ? "Frases útils" : "Slang", a:x.it, b:x.ca, it:1}; }
+  return null;
+}
+const errPending = () => Object.keys(S.err || {}).filter(k => !S.err[k].f && errInfo(k));
+function errQueue(){
+  return errPending().sort((a, b) => S.err[b].n - S.err[a].n || S.err[b].d - S.err[a].d).slice(0, 15).map(k => { const p = k.split(":");
+    if (p[0] === "w") return {t: Math.random() < 0.5 ? "mcci" : recallType(+p[1]), id:+p[1]};
+    if (p[0] === "v") return {t:"verb", v:+p[1], tense:p[2], p:+p[3]};
+    if (p[0] === "g") return {t:"gx", lid:p[1], i:+p[2]};
+    return {t:"dmc", deck:p[1], i:+p[2]}; });
+}
+let ER = {fixed:false};
+function vErrors(){
+  const E = S.err || {}, pend = errPending(), fixed = Object.keys(E).filter(k => E[k].f && errInfo(k));
+  const group = keys => { const by = {}; keys.forEach(k => { const i = errInfo(k); (by[i.k] = by[i.k] || []).push([k, i]); }); return by; };
+  const block = (by, isFixed) => Object.keys(by).map(g => '<div class="stack"><h3>' + g + ' <span class="muted small">' + by[g].length + '</span></h3><div class="list">' + by[g].sort((a, b) => E[b[0]].n - E[a[0]].n).map(([k, i]) => '<div class="item"><span class="grow"><span class="t" lang="it">' + esc(i.a) + '</span><br><span class="s"><span lang="it">' + esc(i.b) + '</span></span></span>' + (isFixed ? '<span class="badge ok">corregit</span>' : '<span class="badge' + (E[k].n >= 3 ? " bad" : " warn") + '">×' + E[k].n + '</span>') + '</div>').join("") + '</div></div>').join("");
+  return '<div class="row"><button class="iconbtn" type="button" data-go="practica" aria-label="Torna a Practica">' + IC.back + '</button><h1>Quadern d\'errors</h1></div>' +
+    '<p class="muted">Aquí es guarda sol tot el que falles als repassos, als verbs, a les lliçons i a les frases. Quan l\'encertes, passa a «corregit».</p>' +
+    (pend.length ? '<div class="card"><div class="row between wrap"><div class="stack" style="gap:2px"><b class="num" style="font-size:1.3rem">' + pend.length + '</b><span class="small muted">' + (pend.length === 1 ? "error per corregir" : "errors per corregir") + '</span></div><button class="btn" type="button" data-a="errRev">Repassa\'ls</button></div><p class="small muted">Cada sessió en treu fins a 15, primer els que has fallat més vegades.</p></div>' + block(group(pend), false)
+      : emptyHtml(Object.keys(E).length ? "No tens cap error pendent. Molt bé!" : "Encara no hi ha cap error. Quan en facis, sortiran aquí.")) +
+    (fixed.length ? '<div class="row between wrap"><button class="btn quiet" type="button" data-a="errFixed">' + (ER.fixed ? "Amaga" : "Mostra") + ' els corregits (' + fixed.length + ')</button>' + (ER.fixed ? '<button class="btn quiet" type="button" data-a="errClean">Esborra els corregits</button>' : "") + '</div>' + (ER.fixed ? block(group(fixed), true) : "") : "");
+}
+
+/* ---------- nivell A2: llista i examen de prova ---------- */
+function vA2(){
+  const all = []; CANDO.forEach((g, gi) => g[1].forEach((x, i) => all.push(gi + "-" + i)));
+  const n = all.filter(k => S.cd[k]).length, pct = Math.round(n / all.length * 100), last = S.mock.length ? S.mock[S.mock.length - 1] : null;
+  return '<div class="row"><button class="iconbtn" type="button" data-go="progres" aria-label="Torna a Progrés">' + IC.back + '</button><h1>Nivell A2</h1></div>' +
+    '<div class="card"><div class="row between wrap"><div class="stack" style="gap:2px"><b class="num" style="font-size:1.6rem">' + pct + ' %</b><span class="small muted">del que s\'espera a l\'A2 (' + n + " de " + all.length + ')</span></div>' + moka(pct >= 80 ? "cele" : pct >= 40 ? "happy" : "think", 54) + '</div>' +
+      '<div class="prog lv"><span>A2</span><span class="tr"><i style="width:' + pct + '%"></i></span><span>' + pct + ' %</span></div>' +
+      '<p class="small muted">Repassa aquesta llista un cop per setmana, per exemple el diumenge. Marca només el que puguis fer sense mirar res.</p></div>' +
+    CANDO.map((g, gi) => '<div class="stack"><h2>' + g[0] + '</h2><div class="list">' + g[1].map((x, i) => { const k = gi + "-" + i; return '<label class="cando"><input type="checkbox" data-cd="' + k + '"' + (S.cd[k] ? " checked" : "") + '><span>' + esc(x) + '</span></label>'; }).join("") + '</div></div>').join("") +
+    '<div class="card"><h2>Examen de prova</h2><p>Quatre parts, com als exàmens oficials (CELI 1, CILS A2): lectura, escolta, llengua i escriptura. Uns 30 minuts. S\'aprova amb un 60 %.</p>' +
+      (last ? '<p class="small muted">Última vegada: ' + cap(longDate(fromDn(last.day))) + ', ' + last.total + ' %' + (last.total >= 60 ? " (aprovat)" : "") + '.</p>' : '<p class="small muted">Et recomano fer-lo a partir de la setmana 10, però el pots provar quan vulguis per veure on ets.</p>') +
+      '<div><button class="btn" type="button" data-a="exStart">' + IC.flag + (last ? "Torna'l a fer" : "Comença l'examen") + '</button></div></div>';
+}
+let EX = null;
+function exInit(){ EX = {sec:0, read: MOCK.read.map(t => t.q.map(() => null)), listen: MOCK.listen.map(t => t.q.map(() => null)), lang: MOCK.lang.map(() => null), plays: MOCK.listen.map(() => 0), text:"", chk: MOCK.wcheck.map(() => false),
+  ord: {read: MOCK.read.map(t => t.q.map(q => shuffle([0, 1, 2]))), listen: MOCK.listen.map(t => t.q.map(q => shuffle([0, 1, 2]))), lang: MOCK.lang.map(() => shuffle([0, 1, 2]))}}; }
+const exQ = (sec, ti, qi, q, ord, a) => '<div class="stack"><p style="font-weight:600" lang="it">' + esc(q[0]) + '</p><div class="opts">' + ord.map(oi => '<button type="button" class="opt' + (a === oi ? " sel" : "") + '" data-ex="' + sec + ":" + ti + ":" + qi + ":" + oi + '" lang="it">' + esc(q[1][oi]) + '</button>').join("") + '</div></div>';
+function exScore(){
+  const pct = (arr, isOk) => { let n = 0, t = 0; arr.forEach((a, i) => { t++; if (isOk(a, i)) n++; }); return Math.round(n / Math.max(1, t) * 100); };
+  const flat = x => x.reduce((a, b) => a.concat(b), []);
+  const read = pct(flat(EX.read), a => a === 0), listen = pct(flat(EX.listen), a => a === 0), lang = pct(EX.lang, a => a === 0), write = Math.round(EX.chk.filter(Boolean).length / EX.chk.length * 100);
+  return {read, listen, lang, write, total: Math.round((read + listen + lang + write) / 4)};
+}
+function vExam(){
+  if (!EX) exInit();
+  const names = ["Lectura", "Escolta", "Llengua", "Escriptura", "Resultat"];
+  const steps = '<div class="exsteps">' + names.map((n, i) => '<span class="' + (i === EX.sec ? "on" : i < EX.sec ? "done" : "") + '">' + n + '</span>').join("") + '</div>';
+  let body = "";
+  if (EX.sec === 0) body = MOCK.read.map((t, ti) => '<div class="card"><span class="badge brand">Text ' + (ti + 1) + '</span><h2 lang="it">' + esc(t.t) + '</h2><p class="reading" lang="it">' + esc(t.text) + '</p>' + t.q.map((q, qi) => exQ("read", ti, qi, q, EX.ord.read[ti][qi], EX.read[ti][qi])).join("") + '</div>').join("");
+  if (EX.sec === 1) body = '<p class="muted">A l\'examen real cada àudio se sent dues vegades. Intenta no escoltar-lo més.</p>' + MOCK.listen.map((t, ti) => '<div class="card"><div class="row between wrap"><h2 lang="it">' + esc(t.t) + '</h2><button class="btn soft" type="button" data-explay="' + ti + '">' + IC.play + 'Escolta (' + EX.plays[ti] + '/2)</button></div>' + t.q.map((q, qi) => exQ("listen", ti, qi, q, EX.ord.listen[ti][qi], EX.listen[ti][qi])).join("") + '</div>').join("");
+  if (EX.sec === 2) body = '<div class="card"><p class="muted">Tria la forma correcta.</p>' + MOCK.lang.map((q, qi) => exQ("lang", 0, qi, q, EX.ord.lang[qi], EX.lang[qi])).join("") + '</div>';
+  if (EX.sec === 3) body = '<div class="card"><p style="font-weight:600" lang="it">' + esc(MOCK.write) + '</p><textarea id="exText" lang="it" spellcheck="false" placeholder="Scrivi qui…">' + esc(EX.text) + '</textarea><span class="small muted num" id="exwc"></span>' +
+    '<h3>Revisa el teu text</h3><div class="list">' + MOCK.wcheck.map((c, i) => '<label class="cando"><input type="checkbox" data-exchk="' + i + '"' + (EX.chk[i] ? " checked" : "") + '><span>' + esc(c) + '</span></label>').join("") + '</div>' +
+    '<div><button class="btn quiet" type="button" data-a="exCopy">Copia per corregir amb una IA</button></div></div>';
+  if (EX.sec === 4) { const r = EX.res || (EX.res = exScore()), pass = r.total >= 60;
+    body = '<div class="card center-card">' + moka(pass ? "cele" : "think", 100) + '<h2>' + (pass ? "Aprovat! Vas molt ben encaminat cap a l'A2." : "Encara no, però ja hi arribes.") + '</h2><b class="num" style="font-size:2.2rem">' + r.total + ' %</b>' +
+      '<div class="stack" style="width:100%">' + [["Lectura", r.read], ["Escolta", r.listen], ["Llengua", r.lang], ["Escriptura", r.write]].map(x => '<div class="prog lv"><span>' + x[0] + '</span><span class="tr"><i style="width:' + x[1] + '%"></i></span><span>' + x[1] + ' %</span></div>').join("") + '</div>' +
+      '<p class="small muted">' + (pass ? "Si vols un títol oficial, busca la convocatòria del CELI 1 o del CILS A2 a l'Istituto Italiano di Cultura de Barcelona." : "Mira quina part et costa més i reforça-la: diàlegs per a l'escolta, lectures per a la lectura, el repàs de gramàtica per a la llengua.") + '</p>' +
+      '<div class="row wrap"><button class="btn" type="button" data-go="a2">Torna a Nivell A2</button><button class="btn quiet" type="button" data-a="exStart">Torna\'l a fer</button></div></div>'; }
+  const canNext = EX.sec === 0 ? EX.read.every(t => t.every(a => a !== null)) : EX.sec === 1 ? EX.listen.every(t => t.every(a => a !== null)) : EX.sec === 2 ? EX.lang.every(a => a !== null) : true;
+  return '<div class="row"><button class="iconbtn" type="button" data-go="a2" aria-label="Surt de l\'examen">' + IC.x + '</button><h1>Examen A2</h1></div>' + steps + body +
+    (EX.sec < 4 ? '<div class="row between"><button class="btn quiet" type="button" data-a="exPrev"' + (EX.sec ? "" : " disabled") + '>Enrere</button><button class="btn" type="button" data-a="exNext"' + (canNext ? "" : " disabled") + '>' + (EX.sec === 3 ? "Acaba l'examen" : "Següent part") + '</button></div>' + (canNext ? "" : '<p class="small muted">Respon totes les preguntes per continuar.</p>') : "");
+}
+function exFinish(){
+  EX.text = ($("exText") || {value:EX.text}).value; EX.res = exScore(); EX.sec = 4;
+  const first = !S.mock.length; S.mock.push(Object.assign({day:T()}, EX.res)); if (S.mock.length > 20) S.mock.shift();
+  if (EX.res.total >= 60) S.st.mockOk = 1;
+  addXP(first ? 30 : 10); save(); render(); window.scrollTo(0, 0);
+  if (EX.res.total >= 60) { confetti(1); fanfare(); }
+}
+
+/* ---------- Practica, escolta i camí ---------- */
+vPractica = function(){
+  const due = dueIds().length, nw = newIds(newLeft()).length, hard = hardIds().length, gp = gramPool(), gw = gp.wrong.length, ga = gw + gp.right.length, rd = Object.keys(S.rd).length, dg = Object.keys(S.dg).length;
+  const pd = dDue("phr").length, sd = dDue("slang").length, ep = errPending().length;
+  const mode = (a, ic, t, s, cls, dis) => '<button type="button" class="mode' + (cls || "") + '" data-a="' + a + '"' + (dis ? " disabled" : "") + '><span class="glyph">' + ic + '</span><span class="t">' + t + '</span><span class="s">' + s + '</span></button>';
+  return '<div class="stack" style="gap:4px"><h1>Practica</h1><p class="muted">El vocabulari compta per al pla del dia. La resta és pràctica lliure, tanta com vulguis.</p></div>' +
+    '<div class="modes">' + mode("vocab", IC.bolt, "Vocabulari", due + nw ? cap(pending(due, nw)) + "." : "Res pendent. Pots afegir-ne 5 de noves.", " main") +
+    mode("errorsPage", IC.note, "Quadern d'errors", ep ? pl(ep, "error per corregir", "errors per corregir") + "." : "Aquí es guarden sols els teus errors.") +
+    mode("gramRev", IC.pen, "Repàs de gramàtica", ga ? (gw ? pl(gw, "exercici per refer", "exercicis per refer") + "." : "Exercicis de les lliçons que ja has fet.") : "Aquí sortiran els exercicis de les lliçons que facis.", "", !ga) +
+    mode("dificils", IC.target, "Paraules difícils", hard ? pl(hard, "paraula que se't resisteix", "paraules que se't resisteixen") + "." : "Aquí sortiran les que fallis dues vegades.", "", !hard) + '</div>' +
+    '<h2>Escoltar i parlar</h2><div class="modes">' +
+    mode("dialogsPage", IC.chat, "Diàlegs", "Converses de situacions reals amb preguntes. " + dg + " de " + DIALOGS.length + " fets.") +
+    mode("parlaPage", IC.mic, "Parla", "Escolta, repeteix i grava't per millorar la pronúncia.") +
+    mode("dictat", IC.ear, "Dictat", voice ? "Escolta una paraula i escriu-la." : "Aquest dispositiu no té veu italiana instal·lada.", "", !voice) + '</div>' +
+    '<h2>Frases i expressions</h2><div class="modes">' +
+    mode("frasiPage", IC.quote, "Frases útils", FRASI.length + " frases per a situacions reals." + (pd ? " " + pl(pd, "repàs pendent", "repassos pendents") + "." : "")) +
+    mode("slangPage", IC.fire, "Slang", "L'italià del carrer, de la trap i del futbol." + (sd ? " " + pl(sd, "repàs pendent", "repassos pendents") + "." : "")) +
+    mode("frases", IC.tiles, "Ordena frases", "Ordena les paraules per traduir una frase.") + '</div>' +
+    '<h2>Llegir i conjugar</h2><div class="modes">' +
+    mode("readings", IC.read, "Lectures", "Una història per setmana, amb àudio i preguntes. " + rd + " de 11 fetes.") +
+    mode("verbsPage", IC.verb, "Verbs", "Conjuga en cinc temps i consulta les taules.") +
+    mode("a2Page", IC.flag, "Nivell A2", "Comprova què ja saps fer i fes l'examen de prova.") + '</div>';
+};
+const _listenSheet = listenSheet;
+listenSheet = function(){
+  _listenSheet();
+  const p = plan(), w = p.pre ? 1 : Math.min(11, p.week), ds = DIALOGS.filter(d => d.w === w), sh = document.querySelector(".sheet > div:nth-child(3)");
+  if (ds.length && sh) sh.insertAdjacentHTML("beforeend", ds.map(d => ' <button class="btn soft" type="button" data-go="dialeg/' + d.id + '">' + IC.chat + esc(d.t) + '</button>').join(""));
+};
+const _pathNodes = pathNodes;
+pathNodes = function(w){
+  const out = _pathNodes(w), ds = DIALOGS.filter(d => d.w === w).map(d => { const r = S.dg[d.id]; return {key:"g" + d.id, ic:"chat", t:d.t, it:true, sub:"Diàleg: " + d.s.toLowerCase(), done:!!r, part: r ? r.ok + " de " + r.total : "", go:"dialeg/" + d.id}; });
+  const k = out.findIndex(n => n.key === "l" + w + ".3");
+  out.splice(k >= 0 ? k + 1 : out.length, 0, ...ds);
+  return out;
+};
+const _achStats = achStats;
+achStats = function(){ const o = _achStats(); o.dialogs5 = Object.keys(S.dg).length >= 5; o.speak20 = (S.st.sh || 0) >= 20; o.phr50 = Object.keys(dStore("phr")).length >= 50; o.mock = !!S.st.mockOk; o.errs20 = Object.keys(S.err || {}).filter(k => S.err[k].f).length >= 20; return o; };
+ACH.push(["dialogs5", "Bona orella", "Acaba 5 diàlegs.", "chat"], ["speak20", "Xerraire", "Grava't 20 vegades.", "mic"], ["phr50", "Frases fetes", "Aprèn 50 frases útils.", "quote"], ["errs20", "Aprenc dels errors", "Corregeix 20 errors del quadern.", "note"], ["mock", "A2 de prova", "Aprova l'examen de prova A2.", "flag"]);
+
+/* ---------- vistes i accions ---------- */
+const EXTRA_V = {dialegs: vDialogs, dialeg: vDialog, parla: vParla, frasi: vFrasi, slang: vSlang, errors: vErrors, a2: vA2, examen: vExam};
+const EXTRA_KINDS = {
+  phr: () => ({title:"Frases útils", q: deckQueue("phr", 5)}),
+  slang: () => ({title:"Slang", q: deckQueue("slang", 5)}),
+  errs: () => ({title:"Quadern d'errors", q: errQueue()})
+};
+Object.assign(ACT, {
+  dialogsPage(){ go("dialegs"); }, parlaPage(){ go("parla"); }, frasiPage(){ go("frasi"); }, slangPage(){ go("slang"); }, errorsPage(){ go("errors"); }, a2Page(){ go("a2"); },
+  dgPlay(){ const d = DIALOGS.find(x => x.id === DG.id); if (!d) return; if (DG.playing) { stopLines(); DG.playing = false; dgMark(-1); return render(); }
+    DG.playing = true; render(); playLines(d.l, {rate: DG.slow ? 0.75 : 1, line: dgMark, done: () => { DG.playing = false; dgMark(-1); if (route().name === "dialeg") render(); }}); },
+  dgSlow(){ DG.slow = !DG.slow; render(); }, dgShow(){ DG.show = !DG.show; render(); }, dgTr(){ DG.tr = !DG.tr; render(); },
+  dgAgain(){ stopLines(); dgInit(DG.id); render(); },
+  prSay(){ const it = prItems(PR.src)[PR.i]; const vf = voiceFor(it.who); playLines([[it.who, it.it]], {}); },
+  prSlow(){ const it = prItems(PR.src)[PR.i]; playLines([[it.who, it.it]], {rate:0.7}); },
+  prRec(){ recToggle(); }, prPlay(){ if (PR.rec) { try { new Audio(PR.rec).play(); } catch(e){} } }, prSR(){ srStart(); },
+  prPrev(){ prMove(-1); }, prNext(){ prMove(1); },
+  phrLearn(){ startSession("phr"); }, slangLearn(){ startSession("slang"); },
+  errRev(){ startSession("errs"); }, errFixed(){ ER.fixed = !ER.fixed; render(); },
+  errClean(){ const E = S.err || {}; Object.keys(E).forEach(k => { if (E[k].f) delete E[k]; }); ER.fixed = false; save(); render(); toast("Errors corregits esborrats"); },
+  exStart(){ exInit(); go("examen"); window.scrollTo(0, 0); },
+  exPrev(){ if (EX.sec === 3) EX.text = ($("exText") || {value:EX.text}).value; EX.sec = Math.max(0, EX.sec - 1); render(); window.scrollTo(0, 0); },
+  exNext(){ stopLines(); if (EX.sec === 3) return exFinish(); EX.sec++; render(); window.scrollTo(0, 0); },
+  exCopy(){ EX.text = $("exText").value; copyText("Soc estudiant d'italià de nivell A2 i parlo català. Corregeix aquest text com en un examen oficial (CELI 1 o CILS A2). Torna'm: 1) el text corregit, 2) els errors, cadascun amb una explicació breu en català, 3) una nota del 0 al 10 i si aprovaria.\n\nConsigna: " + MOCK.write + "\n\nText:\n" + EX.text, "Copiat. Enganxa'l en un xat d'IA."); }
+});
+document.addEventListener("click", e => {
+  const t = e.target, f = s => t.closest && t.closest(s);
+  let el;
+  if ((el = f("[data-dl]")) && DG.id) { const d = DIALOGS.find(x => x.id === DG.id), i = +el.dataset.dl; DG.playing = false; dgMark(i); playLines([d.l[i]], {rate: DG.slow ? 0.75 : 1, done: () => dgMark(-1)}); return; }
+  if ((el = f("[data-dq]"))) return answerDialog(+el.dataset.dq, +el.dataset.do);
+  if ((el = f("[data-fucat]"))) { FU.cat = +el.dataset.fucat; return render(); }
+  if ((el = f("[data-sltag]"))) { SL.tag = el.dataset.sltag; return render(); }
+  if ((el = f("[data-ex]")) && EX) { const [sec, ti, qi, oi] = el.dataset.ex.split(":"); if (sec === "lang") EX.lang[+qi] = +oi; else EX[sec][+ti][+qi] = +oi; return render(); }
+  if ((el = f("[data-explay]")) && EX) { const ti = +el.dataset.explay; EX.plays[ti]++; render(); return playLines(MOCK.listen[ti].l, {}); }
+});
+document.addEventListener("change", e => {
+  const t = e.target;
+  if (t.id === "prsrc") { PR = {src:t.value, i:0, rec:null, recOn:false, srOn:false, sr:null}; return go("parla/" + t.value); }
+  if (t.id === "setSlv") { S.slv = t.checked; save(); return render(); }
+  if (t.dataset && t.dataset.cd) { if (t.checked) S.cd[t.dataset.cd] = T(); else delete S.cd[t.dataset.cd]; save(); return render(); }
+  if (t.dataset && t.dataset.exchk !== undefined && EX) { EX.chk[+t.dataset.exchk] = t.checked; EX.text = ($("exText") || {value:EX.text}).value; return; }
+});
+document.addEventListener("input", e => {
+  if (e.target.id === "exText" && EX) { EX.text = e.target.value; const n = EX.text.trim() ? EX.text.trim().split(/\s+/).length : 0, w = $("exwc"); if (w) w.textContent = pl(n, "paraula", "paraules"); }
+});
+window.addEventListener("hashchange", () => { if (route().name !== "dialeg") { stopLines(); DG.playing = false; } if (route().name !== "parla" && PR.recOn) { try { MREC.stop(); } catch(e){} } });
+ACT.listen = listenSheet;
+
+const _vProgress = vProgress;
+vProgress = function(){
+  const all = CANDO.reduce((n, g) => n + g[1].length, 0), n = Object.keys(S.cd).length, last = S.mock.length ? S.mock[S.mock.length - 1] : null;
+  const card = '<button type="button" class="item a2link" data-go="a2"><span class="glyph">' + IC.flag + '</span><span class="grow"><span class="t">Nivell A2</span><br><span class="s">' + Math.round(n / all * 100) + ' % del que s\'espera a l\'A2' + (last ? " · últim examen de prova: " + last.total + " %" : " · examen de prova") + '</span></span>' + IC.chev + '</button>';
+  return _vProgress().replace('<h1>Progrés</h1>', '<h1>Progrés</h1><div class="list">' + card + '</div>');
+};
 
 applyFreeze();
 render();
