@@ -2803,7 +2803,7 @@ function showTip(el){ let t = $("tip"); if (!el) { if (t) t.remove(); return; } 
 window.addEventListener("beforeunload", () => { if ($("prodText") && $("prodText").value !== (S.texts[String(T())] || "")) saveProd(); });
 window.addEventListener("pagehide", () => { if ($("prodText") && $("prodText").value !== (S.texts[String(T())] || "")) saveProd(); });
 try { if (navigator.storage && navigator.storage.persist) navigator.storage.persist(); } catch(e){}
-try { if ("serviceWorker" in navigator && location.protocol === "https:") navigator.serviceWorker.register("sw.js"); } catch(e){}
+try { if ("serviceWorker" in navigator && location.protocol === "https:") { const had = !!navigator.serviceWorker.controller; let reloaded = false; navigator.serviceWorker.addEventListener("controllerchange", () => { if (had && !reloaded && !SES && !$("prodText")) { reloaded = true; location.reload(); } }); navigator.serviceWorker.register("sw.js", {updateViaCache:"none"}).then(r => { try { r.update(); } catch(e){} }); } } catch(e){}
 
 /* ================= diversió: XP, nivells, assoliments, ratxa protegida, dia curt, lectures, repàs de gramàtica ================= */
 Object.assign(IC, {
