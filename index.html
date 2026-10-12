@@ -1862,9 +1862,18 @@ const hardIds = () => Object.keys(S.cards).map(Number).filter(id => S.cards[id][
 
 /* ================= veu i so ================= */
 let voice = null;
-function pickVoice(){ try { const vs = speechSynthesis.getVoices().filter(v => /^it([-_]|$)/i.test(v.lang)); if (vs.length){ voice = vs.find(v => v.lang === "it-IT") || vs[0]; document.body.classList.add("has-voice"); } } catch(e){} }
-if ("speechSynthesis" in window){ pickVoice(); try { speechSynthesis.addEventListener("voiceschanged", pickVoice); } catch(e){} }
-function speak(text, rate){ if (!voice) return; try { speechSynthesis.cancel(); const u = new SpeechSynthesisUtterance(text); u.voice = voice; u.lang = voice.lang; u.rate = rate || 0.9; speechSynthesis.speak(u); } catch(e){} }
+const NOVELTY = /eddy|flo\b|grandma|grandpa|nonna|nonno|reed|rocko|sandy|shelley|eloquence|bad news|bells|boing|bubbles|cellos|jester|organ|superstar|trinoids|whisper|wobble|zarvox|albert|fred|junior|ralph|kathy/i;
+const vQual = v => { const k = (v.voiceURI + " " + v.name).toLowerCase(); return /premium|prèmium|prémium|neural|natural/.test(k) ? 3 : /enhanced|millorad|mejorad|migliorat|améliorée|erweitert/.test(k) ? 2 : 1; };
+const vLabel = v => v.name.replace(/\s*\((premium|enhanced|millorada|mejorada|prèmium)\)\s*/i, "") + (vQual(v) === 3 ? " · prèmium" : vQual(v) === 2 ? " · millorada" : "") + (v.lang !== "it-IT" ? " (" + v.lang + ")" : "");
+let VOICES = [];
+function pickVoice(){ try {
+  VOICES = speechSynthesis.getVoices().filter(v => /^it([-_]|$)/i.test(v.lang) && !NOVELTY.test(v.name)).sort((a, b) => vQual(b) - vQual(a) || (b.lang === "it-IT") - (a.lang === "it-IT") || (b.localService ? 1 : 0) - (a.localService ? 1 : 0));
+  if (!VOICES.length) { const all = speechSynthesis.getVoices().filter(v => /^it([-_]|$)/i.test(v.lang)); VOICES = all; }
+  if (VOICES.length){ voice = (S.voice && VOICES.find(v => v.voiceURI === S.voice)) || VOICES[0]; document.body.classList.add("has-voice"); }
+} catch(e){} }
+function voicesReady(){ const n = VOICES.length; pickVoice(); if (VOICES.length !== n && typeof render === "function" && route().name === "progres" && S.onboard) render(); }
+if ("speechSynthesis" in window){ pickVoice(); try { speechSynthesis.addEventListener("voiceschanged", voicesReady); } catch(e){} [400, 1500, 4000].forEach(ms => setTimeout(voicesReady, ms)); }
+function speak(text, rate){ if (!voice) return; try { speechSynthesis.cancel(); const u = new SpeechSynthesisUtterance(text); u.voice = voice; u.lang = voice.lang; u.rate = (rate || 0.9) * (S.rate || 1); speechSynthesis.speak(u); } catch(e){} }
 let actx = null;
 function beep(ok){
   if (!S.sound) return;
@@ -2225,6 +2234,9 @@ function vProgress(){
       '<label class="switch" for="setStart"><span>Primer dia del pla</span><input type="date" id="setStart" value="' + esc(S.start) + '"></label>' +
       '<label class="switch" for="setNpd"><span>Paraules noves per dia</span><input type="number" id="setNpd" min="0" max="60" value="' + S.npd + '"></label>' +
       '<div class="switch"><span>Aspecte</span><div class="seg" role="group" aria-label="Aspecte">' + [["auto","Automàtic"],["light","Clar"],["dark","Fosc"]].map(x => '<button type="button" data-theme-set="' + x[0] + '" aria-pressed="' + (S.theme === x[0]) + '">' + x[1] + '</button>').join("") + '</div></div>' +
+      (VOICES.length ? '<div class="switch"><span>Veu italiana</span><select id="setVoice" class="input" aria-label="Veu italiana" style="max-width:13rem">' + VOICES.map(v => '<option value="' + esc(v.voiceURI) + '"' + (voice && v.voiceURI === voice.voiceURI ? " selected" : "") + '>' + esc(vLabel(v)) + '</option>').join("") + '</select></div>' +
+        '<div class="switch"><span>Velocitat de la veu</span><div class="seg" role="group" aria-label="Velocitat">' + [[0.8,"Lenta"],[1,"Normal"],[1.15,"Ràpida"]].map(x => '<button type="button" data-rate="' + x[0] + '" aria-pressed="' + ((S.rate || 1) === x[0]) + '">' + x[1] + '</button>').join("") + '</div></div>' +
+        '<div class="switch"><span class="small muted">Si no surt la veu prèmium que has descarregat, tanca l\'app del tot i torna-la a obrir.</span><button class="btn sm soft" type="button" data-say="Ciao! Sono la Margherita. Impariamo l\'italiano insieme.">Prova la veu</button></div>' : "") +
       sw("setSound", "Sons d'encert i d'error", S.sound) + sw("setT", "Fes entrar també les transparents al repàs", S.inclT) + '</div></div>' +
     '<div class="stack"><h2>Còpia de seguretat</h2><p class="muted small">El progrés es desa només en aquest navegador i en aquest dispositiu. Fes una còpia cada setmana, i sempre abans de canviar el fitxer de l\'app per una versió nova. Per passar el progrés de l\'ordinador a l\'iPad, desa la còpia en un i recupera-la a l\'altre.</p>' +
       (saveOk ? "" : '<p class="small" style="color:var(--bad);font-weight:600">Aquest navegador no està desant el progrés. Fes una còpia abans de tancar.</p>') +
@@ -2357,6 +2369,7 @@ document.addEventListener("click", e => {
   if ((el = t.closest("[data-test]"))) return startSession("test", {w:+el.dataset.test});
   if ((el = t.closest("[data-tense]"))) { const k = el.dataset.tense, i = VB.tenses.indexOf(k); if (i >= 0) VB.tenses.splice(i, 1); else VB.tenses.push(k); return render(); }
   if ((el = t.closest("[data-vgroup]"))) { VB.group = el.dataset.vgroup; return render(); }
+  if ((el = t.closest("[data-rate]"))) { S.rate = +el.dataset.rate; save(); render(); return speak("Piano piano si va lontano."); }
   if ((el = t.closest("[data-theme-set]"))) { S.theme = el.dataset.themeSet; save(); return render(); }
   if ((el = t.closest("[data-npd]"))) { document.querySelectorAll("#obNpd button").forEach(b => b.setAttribute("aria-pressed", b === el)); return; }
 });
@@ -2367,6 +2380,7 @@ document.addEventListener("change", e => {
   if (t.id === "setStart") { if (/^\d{4}-\d{2}-\d{2}$/.test(t.value)) { S.start = t.value; save(); } return; }
   if (t.id === "setNpd") { const n = Math.round(+t.value); if (n >= 0 && n <= 60) { S.npd = n; save(); } return; }
   if (t.id === "setName") { S.name = t.value.trim().slice(0, 30); save(); return; }
+  if (t.id === "setVoice") { S.voice = t.value; save(); pickVoice(); speak("Ciao! Questa è la mia voce."); return; }
   if (t.id === "setSound") { S.sound = t.checked; save(); if (t.checked) beep(true); return; }
   if (t.id === "setT") { S.inclT = t.checked; save(); return; }
 });
